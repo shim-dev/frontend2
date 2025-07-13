@@ -13,7 +13,7 @@
         android:theme="@style/Theme.IT_contest"
         tools:targetApi="31" >
         <activity
-            android:name=".SignUp03Activity"
+            android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,6 +23,8 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".SignupActivity" />
+        <activity android:name=".SignUp02Activity"/>
+        <activity android:name=".SignUp03Activity"/>
         <activity android:name=".SignUp04Activity" />
         <activity android:name=".SignUp05Activity" />
         <activity android:name=".SignUp06Activity" />
@@ -30,7 +32,7 @@
         <activity android:name=".SignUp08Activity"/>
         <activity android:name=".SignUp09Activity"/>
         <activity android:name=".SignUp10Activity"/>
-        <!--        <activity android:name=".SignUp03Activity"/>-->
+
 
 
     </application>
