@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rootLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="30dp"
+            android:layout_gravity="center_horizontal">
+
+            <!-- SHIM 로고 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="30dp"
+                android:src="@drawable/shim_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- SHIM 텍스트 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="SHIM"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/logo"
+                app:layout_constraintStart_toEndOf="@id/logo"
+                app:layout_constraintTop_toTopOf="@id/logo" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="28dp"
+                android:background="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView" />
+
+            <!-- 메인 문구 -->
+            <TextView
+                android:id="@+id/mainText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="36dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="36dp"
+                android:lineSpacingExtra="8dp"
+                android:text="기록을 넘어\n의미있는 실천으로,\n나만의 \n건강 솔루션"
+                android:textColor="#FFFFFF"
+                android:textSize="35sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <!-- 카드 1 -->
+            <LinearLayout
+                android:id="@+id/card1"
+                android:layout_width="0dp"
+                android:layout_height="108dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/information_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mainText"
+                app:layout_constraintWidth_max="360dp">
+
+                <FrameLayout
+                    android:layout_width="96dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/information_black_card">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_chat" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="채팅으로 간단하게\n하루를 기록해보세요."
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 카드 2 -->
+            <LinearLayout
+                android:id="@+id/card2"
+                android:layout_width="0dp"
+                android:layout_height="108dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/information_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/card1"
+                app:layout_constraintWidth_max="360dp">
+
+                <FrameLayout
+                    android:layout_width="96dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/information_black_card">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_community" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="함께하면 더 쉬운\n저속노화 생활 습관 관리."
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 카드 3 -->
+            <LinearLayout
+                android:id="@+id/card3"
+                android:layout_width="0dp"
+                android:layout_height="108dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/information_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/card2"
+                app:layout_constraintWidth_max="360dp">
+
+                <FrameLayout
+                    android:layout_width="96dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/information_black_card">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_map" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="언제 어디서나\n내 주변 저속노화 메뉴 찾기."
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 버튼 Row -->
+            <LinearLayout
+                android:id="@+id/buttonRow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/card3"
+                app:layout_constraintWidth_max="360dp">
+
+                <Button
+                    android:id="@+id/LoginButton"
+                    android:layout_width="150dp"
+                    android:layout_height="58dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/login_button"
+                    android:text="Login"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    app:backgroundTint="@android:color/white" />
+
+                <Button
+                    android:id="@+id/SignUpButton"
+                    android:layout_width="150dp"
+                    android:layout_height="58dp"
+                    android:background="@drawable/sign_up_botton"
+                    android:text="Sign up"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    app:backgroundTint="@android:color/white" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

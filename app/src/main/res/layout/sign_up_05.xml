@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sign_up_05"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="27dp"
+                android:layout_marginTop="53dp"
+                android:src="@drawable/ic_backarrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 회원가입 텍스트 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="53dp"
+                android:text="신체정보"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="28dp"
+                android:background="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView" />
+
+
+            <!-- 상태 진행 바 -->
+            <View
+                android:id="@+id/status02"
+                android:layout_width="200dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="26dp"
+                android:layout_marginTop="-3dp"
+                android:layout_marginEnd="306dp"
+                android:background="@drawable/ic_status_bar_03"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <!-- 메인 문구 -->
+            <LinearLayout
+                android:id="@+id/hello_group"
+                android:layout_width="360dp"
+                android:layout_height="230dp"
+                android:layout_marginTop="205dp"
+                android:orientation="vertical"
+                android:paddingTop="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 맞춤형 서비스..! -->
+                <TextView
+                    android:id="@+id/title_hello"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:text="신체 정보를 알려주세요."
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <!-- 어떻게 불러드릴까요? -->
+                <TextView
+                    android:id="@+id/title_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="40dp"
+                    android:text="신체 정보에 따라 \n추천되는 식단이 달라집니다."
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/height_weight_group"
+                android:layout_width="290dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="450dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingTop="30dp"
+                android:paddingBottom="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 키 입력 영역 -->
+                <LinearLayout
+                    android:layout_width="290dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:text="키"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp" />
+
+                    <LinearLayout
+                        android:layout_width="190dp"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:background="@drawable/cm__kg_background"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/edit_height"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:hint="입력"
+                            android:inputType="number"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:gravity="end|center_vertical"/>
+
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="cm"
+                            android:textColor="#FFFFFF"
+                            android:textSize="22sp"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 몸무게 입력 영역 -->
+                <LinearLayout
+                    android:layout_width="290dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:text="몸무게"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp" />
+
+                    <LinearLayout
+                        android:layout_width="190dp"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal"
+                        android:background="@drawable/cm__kg_background"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/edit_weight"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:hint="입력"
+                            android:inputType="number"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:gravity="end|center_vertical"/>
+
+                        <TextView
+                            android:layout_width="45dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+
+                            android:text="kg"
+                            android:textColor="#FFFFFF"
+                            android:textSize="24sp"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+
+
+            <Button
+                android:id="@+id/btn_next"
+                android:layout_width="260dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/next_button"
+                android:text="다음"
+                android:textColor="#222222"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:backgroundTint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

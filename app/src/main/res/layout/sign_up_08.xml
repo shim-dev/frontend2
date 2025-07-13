@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sign_up_08"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="27dp"
+                android:layout_marginTop="53dp"
+                android:src="@drawable/ic_backarrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 회원가입 텍스트 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="53dp"
+                android:text="커피"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="28dp"
+                android:background="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView" />
+
+
+            <!-- 상태 진행 바 -->
+            <View
+                android:id="@+id/status02"
+                android:layout_width="320dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="26dp"
+                android:layout_marginTop="-3dp"
+                android:layout_marginEnd="306dp"
+                android:background="@drawable/ic_status_bar_03"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <!-- 메인 문구 -->
+            <LinearLayout
+                android:id="@+id/hello_group"
+                android:layout_width="360dp"
+                android:layout_height="230dp"
+                android:layout_marginTop="150dp"
+                android:orientation="vertical"
+                android:paddingTop="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 맞춤형 서비스..! -->
+                <TextView
+                    android:id="@+id/title_hello"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:text="하루 평균 \n커피 섭취량을 알려주세요."
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <!-- 어떻게 불러드릴까요? -->
+                <TextView
+                    android:id="@+id/title_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="40dp"
+                    android:text="하루 카페인 섭취량은 \n저속 노화 속도 계산에 포합됩니다."
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="390dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="450dp"
+                android:background="@drawable/outer_rectangle"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 왼쪽 원형 버튼 -->
+                <ImageButton
+                    android:id="@+id/btn_down"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/circle"
+                    android:contentDescription="down"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_down_arrow" />
+
+                <!-- 숫자 표시부 (중앙) -->
+                <LinearLayout
+                    android:layout_width="220dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/inner_rectangle"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="0dp">
+
+                    <!-- 첫 번째 숫자 -->
+                    <TextView
+                        android:id="@+id/num_left"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="#FFFFFF"
+                        android:textSize="56sp"
+                        android:textStyle="normal" />
+
+                    <!-- 가운데 점선 구분선 -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="70dp"
+                        android:layout_gravity="center"
+                        android:background="#44FFFFFF" />
+
+                    <!-- 두 번째 숫자 -->
+                    <TextView
+                        android:id="@+id/num_right"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="#FFFFFF"
+                        android:textSize="56sp"
+                        android:textStyle="normal" />
+                </LinearLayout>
+
+                <!-- 오른쪽 원형 버튼 -->
+                <ImageButton
+                    android:id="@+id/btn_up"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/circle"
+                    android:contentDescription="up"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_up_arrow" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_next"
+                android:layout_width="260dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/next_button"
+                android:text="다음"
+                android:textColor="#222222"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:backgroundTint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

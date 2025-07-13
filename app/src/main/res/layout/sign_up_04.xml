@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sign_up_04"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="27dp"
+                android:layout_marginTop="53dp"
+                android:src="@drawable/ic_backarrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 회원가입 텍스트 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="53dp"
+                android:text="성별"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="28dp"
+                android:background="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView" />
+
+
+            <!-- 상태 진행 바 -->
+            <View
+                android:id="@+id/status04"
+                android:layout_width="160dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="26dp"
+                android:layout_marginTop="-3dp"
+                android:layout_marginEnd="306dp"
+                android:background="@drawable/ic_status_bar_03"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <!-- 메인 문구 -->
+            <LinearLayout
+                android:id="@+id/hello_group"
+                android:layout_width="360dp"
+                android:layout_height="230dp"
+                android:layout_marginTop="205dp"
+                android:orientation="vertical"
+                android:paddingTop="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 맞춤형 서비스..! -->
+                <TextView
+                    android:id="@+id/title_hello"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:text="성별을 알려주세요."
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <!-- 어떻게 불러드릴까요? -->
+                <TextView
+                    android:id="@+id/title_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="40dp"
+                    android:text="성별에 따라 하루 권장되는 \n영양성분 정보가 달라집니다."
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/gender_group"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="475dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 남성 버튼 -->
+                <FrameLayout
+                    android:id="@+id/frame_male"
+                    android:layout_width="match_parent"
+                    android:layout_height="63dp">
+
+                    <!-- 흰색 둥근 배경 -->
+                    <View
+                        android:id="@+id/bg_male"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/next_button" />
+
+                    <!-- 초록색 게이지 (width 0 ~ 100% 애니메이션) -->
+                    <View
+                        android:id="@+id/gauge_male"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gauge_fill_button" />
+
+                    <!-- 텍스트 (투명 배경) -->
+                    <TextView
+                        android:id="@+id/text_male"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="남성"
+                        android:textColor="#222222"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp" />
+
+                <!-- 여성 버튼 -->
+                <FrameLayout
+                    android:id="@+id/frame_female"
+                    android:layout_width="match_parent"
+                    android:layout_height="63dp"
+                    android:layout_marginBottom="0dp">
+
+                    <!-- 흰색 둥근 배경 -->
+                    <View
+                        android:id="@+id/bg_female"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/next_button" />
+
+                    <!-- 초록색 게이지 -->
+                    <View
+                        android:id="@+id/gauge_female"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gauge_fill_button" />
+
+                    <!-- 텍스트 (투명 배경) -->
+                    <TextView
+                        android:id="@+id/text_female"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="여성"
+                        android:textColor="#222222"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp" />
+
+                <!-- 기타 버튼 -->
+                <FrameLayout
+                    android:id="@+id/frame_etc"
+                    android:layout_width="match_parent"
+                    android:layout_height="63dp"
+                    android:layout_marginBottom="0dp">
+
+                    <!-- 흰색 둥근 배경 -->
+                    <View
+                        android:id="@+id/bg_etc"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/next_button" />
+
+                    <!-- 초록색 게이지 -->
+                    <View
+                        android:id="@+id/gauge_etc"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gauge_fill_button" />
+
+                    <!-- 텍스트 (투명 배경) -->
+                    <TextView
+                        android:id="@+id/text_etc"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="기타"
+                        android:textColor="#222222"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </FrameLayout>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

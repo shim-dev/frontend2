@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sign_up_02"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="27dp"
+                android:layout_marginTop="53dp"
+                android:src="@drawable/ic_backarrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 회원가입 텍스트 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="112dp"
+                android:text="닉네임"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/logo"
+                app:layout_constraintStart_toEndOf="@id/logo"
+                app:layout_constraintTop_toTopOf="@id/logo" />
+
+            <!-- 구분선 -->
+            <View
+                android:id="@+id/line"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="28dp"
+                android:background="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView" />
+
+
+            <!-- 상태 진행 바 -->
+            <View
+                android:id="@+id/status02"
+                android:layout_width="80dp"
+                android:layout_height="6dp"
+                android:layout_marginStart="26dp"
+                android:layout_marginTop="-3dp"
+                android:layout_marginEnd="306dp"
+                android:background="@drawable/ic_status_bar_02"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/line" />
+
+            <!-- 메인 문구 -->
+            <LinearLayout
+                android:id="@+id/hello_group"
+                android:layout_width="326dp"
+                android:layout_height="240dp"
+                android:layout_marginTop="205dp"
+                android:orientation="vertical"
+                android:paddingTop="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 반가워요! -->
+                <TextView
+                    android:id="@+id/title_hello"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="25dp"
+                    android:text="반가워요!"
+                    android:textColor="#FFFFFF"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <!-- 간격 -->
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="12dp" />
+
+                <!-- 어떻게 불러드릴까요? -->
+                <TextView
+                    android:id="@+id/title_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="40dp"
+                    android:text="어떻게 불러드릴까요?"
+                    android:textColor="#FFFFFF"
+                    android:textSize="28sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/nickname_layer"
+                android:layout_width="326dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="475dp">
+
+                <EditText
+                    android:id="@+id/nickname_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="닉네임을 입력해 주세요."
+                    android:textColor="#AAAAAA"
+                    android:textColorHint="#FFFFFF"
+                    android:textSize="20sp"
+                    android:gravity="start"
+                    android:paddingBottom="8dp"
+                    android:background="@android:color/transparent"
+                    android:layout_marginBottom="5dp"/>
+
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="#FFFFFF" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_next"
+                android:layout_width="260dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/next_button"
+                android:text="다음"
+                android:textColor="#222222"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:backgroundTint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

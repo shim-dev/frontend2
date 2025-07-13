@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0D08">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/sign_up_10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <!-- 뒤로가기 버튼 -->
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="27dp"
+                android:layout_marginTop="53dp"
+                android:src="@drawable/ic_backarrow"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 메인 문구 -->
+            <LinearLayout
+                android:id="@+id/hello_group"
+                android:layout_width="360dp"
+                android:layout_height="350dp"
+                android:orientation="vertical"
+                android:paddingTop="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 맞춤형 서비스..! -->
+                <TextView
+                    android:id="@+id/title_hello"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="120dp"
+                    android:gravity="center"
+                    android:text="감사합니다!"
+                    android:textColor="#FFFFFF"
+                    android:textSize="35sp"
+                    android:textStyle="bold" />
+
+
+                <!-- 어떻게 불러드릴까요? -->
+                <TextView
+                    android:id="@+id/title_nickname"
+                    android:layout_width="360dp"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="40dp"
+                    android:gravity="center"
+                    android:text="SHIM과 함께 \n건강한 라이프 스타일을 실천해볼까요?"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/btn_next"
+                android:layout_width="260dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/next_button"
+                android:text="시작하기"
+                android:textColor="#222222"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:backgroundTint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>
