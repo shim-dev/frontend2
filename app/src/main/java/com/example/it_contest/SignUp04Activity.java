@@ -11,80 +11,83 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.it_contest.model.UserData;
+
 public class SignUp04Activity extends AppCompatActivity {
-    private boolean isAnimating = false; // 한 번에 하나만 동작
+    private boolean isAnimating = false;
+    private UserData userData; // ✅ 이전 화면에서 전달받은 데이터
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sign_up_04); // 레이아웃 파일명 맞게!
+        setContentView(R.layout.sign_up_04);
 
-        // 1. 뒤로 가기 버튼
+        // ✅ UserData 받기
+        userData = (UserData) getIntent().getSerializableExtra("userData");
+
         ImageView btnBack = findViewById(R.id.logo);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // 이전 화면으로 복귀
-            }
-        });
+        btnBack.setOnClickListener(v -> finish());
 
+        // 각 버튼 연결 + 선택 시 성별 저장
         setupGaugeButton(
                 findViewById(R.id.frame_male),
                 findViewById(R.id.gauge_male),
-                findViewById(R.id.text_male)
+                findViewById(R.id.text_male),
+                "male"
         );
         setupGaugeButton(
                 findViewById(R.id.frame_female),
                 findViewById(R.id.gauge_female),
-                findViewById(R.id.text_female)
+                findViewById(R.id.text_female),
+                "female"
         );
         setupGaugeButton(
                 findViewById(R.id.frame_etc),
                 findViewById(R.id.gauge_etc),
-                findViewById(R.id.text_etc)
+                findViewById(R.id.text_etc),
+                "etc"
         );
     }
 
-    private void setupGaugeButton(FrameLayout frame, View gauge, TextView text) {
+    // ✅ 성별 값까지 받는 메서드로 수정
+    private void setupGaugeButton(FrameLayout frame, View gauge, TextView text, String genderValue) {
         Handler handler = new Handler();
-        final int duration = 1000; // 밀리초 (1초)
-        final int interval = 10;   // 게이지 애니메이션 간격(ms)
+        final int duration = 1000;
+        final int interval = 10;
         final int[] maxWidth = {0};
         final boolean[] isPressed = {false};
 
-        // 텍스트뷰의 Touch 이벤트 사용
         text.setOnTouchListener(new View.OnTouchListener() {
             long startTime;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (isAnimating) return true; // 다른 버튼 누르는 중엔 무시
+                if (isAnimating) return true;
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         isPressed[0] = true;
                         startTime = System.currentTimeMillis();
 
-                        // 게이지 초기화
                         gauge.setLayoutParams(new FrameLayout.LayoutParams(0, FrameLayout.LayoutParams.MATCH_PARENT));
                         gauge.setVisibility(View.VISIBLE);
 
-                        // 최대 너비 측정
                         frame.post(() -> {
                             maxWidth[0] = frame.getWidth();
                             handler.post(updateRunnable);
                         });
                         return true;
+
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         isPressed[0] = false;
-                        // 완전히 차지 않았으면 게이지 리셋
                         gauge.setLayoutParams(new FrameLayout.LayoutParams(0, FrameLayout.LayoutParams.MATCH_PARENT));
                         return true;
                 }
                 return false;
             }
 
+            // 애니메이션 Runnable
             Runnable updateRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -97,19 +100,24 @@ public class SignUp04Activity extends AppCompatActivity {
                     if (ratio < 1f) {
                         handler.postDelayed(this, interval);
                     } else {
-                        // 게이지 완료!
                         isAnimating = true;
                         gauge.setLayoutParams(new FrameLayout.LayoutParams(maxWidth[0], FrameLayout.LayoutParams.MATCH_PARENT));
-                        // 다음 화면 이동
+
+                        // ✅ 성별 저장
+                        if (userData != null) {
+                            userData.gender = genderValue;
+                        }
+
+                        // ✅ 다음 화면으로 전달
                         handler.postDelayed(() -> {
                             Intent intent = new Intent(SignUp04Activity.this, SignUp05Activity.class);
+                            intent.putExtra("userData", userData);
                             startActivity(intent);
                             finish();
-                        }, 200); // 0.2초 후 화면 전환 (게이지 꽉 찬 효과 보이게)
+                        }, 200);
                     }
                 }
             };
         });
     }
 }
-
