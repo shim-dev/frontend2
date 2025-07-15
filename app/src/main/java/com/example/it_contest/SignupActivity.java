@@ -15,9 +15,13 @@ import android.text.TextWatcher;
 import android.text.Editable;
 import android.widget.Spinner;
 
+import com.example.it_contest.model.UserData;
+
 public class SignupActivity extends AppCompatActivity {
     // 도메인 선택 인덱스를 저장하는 변수
     final int[] selectedDomainIndex = {0};
+
+    private UserData userData = new UserData(); // ✅ UserData 객체 생성
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +101,18 @@ public class SignupActivity extends AppCompatActivity {
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // 입력값 추출
+                String emailInput = editEmail.getText().toString().trim();
+                String pwInput = editPw.getText().toString().trim();
+                String domain = (String) spinnerDomain.getSelectedItem();
+
+                // ✅ UserData 객체에 저장
+                userData.email = emailInput + "@" + domain;
+                userData.password = pwInput;
+
                 Intent intent = new Intent(SignupActivity.this, SignUp02Activity.class);
+                intent.putExtra("userData", userData);
                 startActivity(intent);
                 finish();
             }
