@@ -110,13 +110,25 @@ public class SignupActivity extends AppCompatActivity {
         String pw = editPw.getText().toString().trim();
         String pw2 = editPw2.getText().toString().trim();
 
-        boolean enable =
-                !email.isEmpty() &&
-                        !pw.isEmpty() &&
-                        !pw2.isEmpty() &&
-                        pw.equals(pw2) &&
-                        selectedDomainIndex[0] != 0; // 도메인 반드시 선택
+        boolean isEmailValid = !email.isEmpty();
+        boolean isPwMatch = !pw.isEmpty() && pw.equals(pw2);
+        boolean isPwValid = pw.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
+        boolean isDomainSelected = selectedDomainIndex[0] != 0;
 
+        boolean enable = isEmailValid && isPwMatch && isPwValid && isDomainSelected;
         btnNext.setEnabled(enable);
+
+        // 비밀번호가 잘못되었을 경우 사용자에게 알려줌
+        if (!pw.isEmpty() && !isPwValid) {
+            editPw.setError("비밀번호는 영문, 숫자, 특수문자 포함 8자 이상이어야 합니다.");
+        } else {
+            editPw.setError(null); // 에러 해제
+        }
+
+        if (!pw2.isEmpty() && !pw.equals(pw2)) {
+            editPw2.setError("비밀번호가 일치하지 않습니다");
+        } else {
+            editPw2.setError(null);
+        }
     }
 }
