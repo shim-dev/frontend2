@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="#F9F9F6">
 
-    <!-- ✅ 상단 바 -->
+    <!--  상단 바 -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -38,7 +38,7 @@
             android:src="@drawable/menu" />
     </LinearLayout>
 
-    <!-- ✅ 메시지 영역 -->
+    <!-- 메시지 영역 -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
@@ -82,7 +82,7 @@
         </LinearLayout> <!-- chatContainer 끝 -->
     </ScrollView> <!-- ScrollView 끝 -->
 
-    <!-- ✅ 입력창 -->
+    <!--  입력창 -->
     <LinearLayout
         android:id="@+id/inputLayout"
         android:layout_width="match_parent"
@@ -93,6 +93,14 @@
         android:padding="8dp"
         android:gravity="center_vertical">
 
+        <ImageButton
+            android:id="@+id/buttonCamera"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_camera"
+        android:contentDescription="카메라 열기" />
+
         <EditText
             android:id="@+id/editTextMessage"
             android:layout_width="0dp"
@@ -101,6 +109,7 @@
             android:background="@android:color/transparent"
             android:hint="채팅 내용을 입력해주세요."
             android:inputType="text"
+            android:paddingStart="15dp"
             android:minHeight="48dp" />
 
         <ImageButton
