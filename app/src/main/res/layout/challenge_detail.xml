@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,6 +14,9 @@
         android:src="@drawable/ic_back"
         android:scaleType="centerInside"
         android:background="@android:color/transparent"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="16dp"
@@ -25,6 +29,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:elevation="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
@@ -46,179 +54,247 @@
             android:textColor="#000000" />
     </LinearLayout>
 
-    <!-- 챌린지 이미지 -->
-    <ImageView
-        android:id="@+id/challenge_image"
+    <!-- 스크롤 가능한 내용 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
-        android:layout_height="265dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_chat"
-        app:layout_constraintTop_toBottomOf="@+id/back_button"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/back_button"
+        app:layout_constraintBottom_toTopOf="@id/challenge_schedule_row"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- 챌린지 제목 -->
-    <TextView
-        android:id="@+id/challenge_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[운동 챌린지] 하루 5000보 걷기"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        app:layout_constraintTop_toBottomOf="@id/challenge_image"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 챌린지 이미지 -->
+            <ImageView
+                android:id="@+id/challenge_image"
+                android:layout_width="match_parent"
+                android:layout_height="265dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_chat"
+                android:layout_marginTop="100dp" />
+
+            <!-- 제목 -->
+            <TextView
+                android:id="@+id/challenge_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="[운동 챌린지] 하루 5000보 걷기"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp" />
+
+            <!-- 모집 마감일 -->
+            <TextView
+                android:id="@+id/deadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="모집 마감일 까지 : 4일 00시간 00분 전"
+                android:textSize="15sp"
+                android:textColor="#CC000000"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp" />
+
+            <!-- 마감 인원 + 현재 인원 -->
+            <LinearLayout
+                android:id="@+id/participant_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="24dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="마감 인원: 70명"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/ic_person"
+                    app:tint="#000000" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="현재 참여 인원: 50명"
+                    android:textColor="#000000"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- 도전금 -->
+            <LinearLayout
+                android:id="@+id/entry_fee_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_point"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:id="@+id/entry_fee"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="도전금: 50P"
+                    android:textColor="#000000"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- 챌린지 정보 -->
+            <TextView
+                android:id="@+id/info_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="챌린지 정보"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp" />
+
+            <TextView
+                android:id="@+id/info_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="저속 노화에 운동은 필수 요건! 걷기부터 시작해보세요"
+                android:textSize="15sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="24dp" />
+
+            <!-- 인증 방법 -->
+            <TextView
+                android:id="@+id/method_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="인증 방법"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp" />
+
+            <TextView
+                android:id="@+id/method_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="기본 건강 어플의 걸음수를 캡쳐해서 올려주세요"
+                android:textSize="15sp"
+                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="24dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 구분선 -->
+    <View
+        android:id="@+id/section_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintBottom_toTopOf="@id/challenge_schedule_row"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="12dp"
-        android:layout_marginStart="24dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 모집 마감일 -->
-    <TextView
-        android:id="@+id/deadline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="모집 마감일 까지 : 4일 00시간 00분 전"
-        android:textSize="15sp"
-        android:textColor="#CC000000"
-        app:layout_constraintTop_toBottomOf="@id/challenge_title"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="4dp" />
-
-    <!-- 마감 인원 + 현재 인원 -->
+    <!-- 일정 + 버튼 -->
     <LinearLayout
-        android:id="@+id/participant_row"
+        android:id="@+id/challenge_schedule_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:weightSum="2"
-        app:layout_constraintTop_toBottomOf="@id/deadline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="4dp">
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/include_bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
+        <!-- 날짜 정보 -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="마감 인원: 70명"
-            android:textColor="#000000"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_calendar"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="챌린지 일정"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/challenge_date_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25.07.06 ~ 25.07.20"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- 참여 버튼 -->
+        <Button
+            android:id="@+id/participate_button"
+            android:layout_width="160dp"
+            android:layout_height="67dp"
+            android:text="챌린지 참여하기"
+            android:textColor="#FFFFFF"
             android:textSize="15sp"
-            android:ellipsize="end"
-            android:maxLines="1"/>
-
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginEnd="4dp"
-            android:src="@drawable/ic_person"
-            app:tint="#000000" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="현재 참여 인원: 50명"
-            android:textColor="#000000"
-            android:textSize="15sp" />
+            android:backgroundTint="#000000"
+            android:layout_marginStart="8dp" />
     </LinearLayout>
 
-    <!-- 도전금 -->
-    <LinearLayout
-        android:id="@+id/entry_fee_box"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        app:layout_constraintTop_toBottomOf="@id/participant_row"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="24dp">
-
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_point"
-            android:layout_marginEnd="4dp" />
-
-        <TextView
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="도전금: 50P"
-            android:textColor="#000000"
-            android:textSize="15sp" />
-    </LinearLayout>
-
-    <!-- 챌린지 정보 -->
-    <TextView
-        android:id="@+id/info_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="챌린지 정보"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        app:layout_constraintTop_toBottomOf="@id/entry_fee_box"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp" />
-
-    <TextView
-        android:id="@+id/info_content"
+    <!-- 하단 네비게이션 -->
+    <include
+        android:id="@+id/include_bottom_nav"
+        layout="@layout/bottom_navigation_main"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="저속 노화에 운동은 필수 요건! 걷기부터 시작해보세요"
-        android:textSize="15sp"
-        android:textColor="#000000"
-        app:layout_constraintTop_toBottomOf="@id/info_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="4dp" />
-
-    <!-- 인증 방법 -->
-    <TextView
-        android:id="@+id/method_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="인증 방법"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        app:layout_constraintTop_toBottomOf="@id/info_content"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp" />
-
-    <TextView
-        android:id="@+id/method_content"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="기본 건강 어플의 걸음수를 캡쳐해서 올려주세요"
-        android:textSize="15sp"
-        android:textColor="#000000"
-        app:layout_constraintTop_toBottomOf="@id/method_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="4dp" />
-
-    <!-- 참여 버튼 -->
-    <Button
-        android:id="@+id/participate_button"
-        android:layout_width="0dp"
-        android:layout_height="67dp"
-        android:text="챌린지 참여하기"
-        android:textColor="#FFFFFF"
-        android:textSize="15sp"
-        android:backgroundTint="#000000"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp" />
-
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

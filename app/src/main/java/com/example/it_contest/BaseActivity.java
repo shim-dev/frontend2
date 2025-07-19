@@ -12,9 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class BaseActivity extends AppCompatActivity {
 
-    protected LinearLayout menuHome, menuRecord, menuChallenge, menuMy;
-    protected ImageView iconHome, iconMap, iconChallenge, iconMy;
-    protected TextView textHome, textMap, textChallenge, textMy;
+    protected LinearLayout menuHome, menuCommunity, menuChallenge, menuMy;
+    protected ImageView iconHome, iconCommunity, iconChallenge, iconMy;
+    protected TextView textHome, textCommunity, textChallenge, textMy;
 
     protected int black, gray;
 
@@ -31,17 +31,17 @@ public class BaseActivity extends AppCompatActivity {
 
         // 메뉴 아이템 연결
         menuHome = findViewById(R.id.menu_home);
-        menuRecord = findViewById(R.id.menu_map);
+        menuCommunity = findViewById(R.id.menu_community);   // 기존 map → community로 변경
         menuChallenge = findViewById(R.id.menu_challenge);
         menuMy = findViewById(R.id.menu_my);
 
         iconHome = findViewById(R.id.icon_home);
-        iconMap = findViewById(R.id.icon_map);
+        iconCommunity = findViewById(R.id.icon_community);   // map 아이콘 → community 아이콘으로 변경
         iconChallenge = findViewById(R.id.icon_challenge);
         iconMy = findViewById(R.id.icon_my);
 
         textHome = findViewById(R.id.text_home);
-        textMap = findViewById(R.id.text_map);
+        textCommunity = findViewById(R.id.text_community);
         textChallenge = findViewById(R.id.text_challenge);
         textMy = findViewById(R.id.text_my);
 
@@ -56,18 +56,17 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
 
-        menuRecord.setOnClickListener(v -> {
-            if (!selected.equals("map")) {
-                // TODO: mapActivity로 이동
-                // startActivity(new Intent(this, MapActivity.class));
+        menuCommunity.setOnClickListener(v -> {
+            if (!selected.equals("community")) {
+                // TODO: CommunityActivity로 이동
+                // startActivity(new Intent(this, CommunityActivity.class));
             }
         });
 
         menuChallenge.setOnClickListener(v -> {
-            if (!selected.equals("challenge")) {
-                startActivity(new Intent(this, ChallengeActivity.class));
-                overridePendingTransition(0, 0);
-            }
+            // challenge는 항상 ChallengeActivity로 이동하도록 (selected 체크 안 함)
+            startActivity(new Intent(this, ChallengeActivity.class));
+            overridePendingTransition(0, 0);
         });
 
         menuMy.setOnClickListener(v -> {
@@ -80,12 +79,12 @@ public class BaseActivity extends AppCompatActivity {
 
     private void selectMenu(String selected) {
         iconHome.setColorFilter(selected.equals("home") ? black : gray);
-        iconMap.setColorFilter(selected.equals("map") ? black : gray);
+        iconCommunity.setColorFilter(selected.equals("community") ? black : gray);
         iconChallenge.setColorFilter(selected.equals("challenge") ? black : gray);
         iconMy.setColorFilter(selected.equals("my") ? black : gray);
 
         textHome.setVisibility(selected.equals("home") ? View.VISIBLE : View.GONE);
-        textMap.setVisibility(selected.equals("map") ? View.VISIBLE : View.GONE);
+        textCommunity.setVisibility(selected.equals("community") ? View.VISIBLE : View.GONE);
         textChallenge.setVisibility(selected.equals("challenge") ? View.VISIBLE : View.GONE);
         textMy.setVisibility(selected.equals("my") ? View.VISIBLE : View.GONE);
     }
