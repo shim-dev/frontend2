@@ -51,6 +51,13 @@ public class SignUp02Activity extends AppCompatActivity {
                 buttonNext.setEnabled(s.length() >= 2);
                 // 버튼 배경 바꾸고 싶으면 아래처럼 추가로 스타일링 가능
                 // buttonNext.setAlpha(s.length() >= 2 ? 1.0f : 0.5f);
+
+                // 이름이 2글자 미만일 경우 에러 메시지 표시
+                if (s.length() < 2) {
+                    editTextNickname.setError("이름은 2자 이상이어야 합니다.");
+                } else {
+                    editTextNickname.setError(null); // 에러 해제
+                }
             }
 
             @Override
