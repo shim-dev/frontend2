@@ -10,23 +10,24 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.it_contest.model.UserData;
+
 public class SignUp08Activity extends AppCompatActivity {
-    private int value = 0; // 시작값, 원하면 0 등으로 수정!
+    private int value = 0;
     private TextView numLeft, numRight;
+    private UserData userData; // ✅ 전달받을 UserData
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sign_up_08);
 
+        // ✅ UserData 받아오기
+        userData = (UserData) getIntent().getSerializableExtra("userData");
+
         // 뒤로 가기 버튼
         ImageView btnBack = findViewById(R.id.logo);
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        btnBack.setOnClickListener(v -> finish());
 
         // 숫자 게이지 연결
         numLeft = findViewById(R.id.num_left);
@@ -36,26 +37,27 @@ public class SignUp08Activity extends AppCompatActivity {
 
         updateNumber();
 
-        btnUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                value = (value + 1) % 100; // 0~99
-                updateNumber();
-            }
+        btnUp.setOnClickListener(v -> {
+            value = (value + 1) % 100; // 0~99
+            updateNumber();
         });
 
-        btnDown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                value = (value - 1 + 100) % 100;
-                updateNumber();
-            }
+        btnDown.setOnClickListener(v -> {
+            value = (value - 1 + 100) % 100; // 음수 방지
+            updateNumber();
         });
 
-        // 다음 버튼 구현
+        // 다음 버튼
         Button btnNext = findViewById(R.id.btn_next);
         btnNext.setOnClickListener(v -> {
+            // ✅ 값 저장
+            if (userData != null) {
+                userData.caffeine = value;
+            }
+
+            // ✅ 다음 액티비티로 전달
             Intent intent = new Intent(SignUp08Activity.this, SignUp09Activity.class);
+            intent.putExtra("userData", userData);
             startActivity(intent);
         });
     }

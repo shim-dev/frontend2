@@ -15,9 +15,13 @@ import android.text.TextWatcher;
 import android.text.Editable;
 import android.widget.Spinner;
 
+import com.example.it_contest.model.UserData;
+
 public class SignupActivity extends AppCompatActivity {
     // 도메인 선택 인덱스를 저장하는 변수
     final int[] selectedDomainIndex = {0};
+
+    private UserData userData = new UserData(); // ✅ UserData 객체 생성
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +101,18 @@ public class SignupActivity extends AppCompatActivity {
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // 입력값 추출
+                String emailInput = editEmail.getText().toString().trim();
+                String pwInput = editPw.getText().toString().trim();
+                String domain = (String) spinnerDomain.getSelectedItem();
+
+                // ✅ UserData 객체에 저장
+                userData.email = emailInput + "@" + domain;
+                userData.password = pwInput;
+
                 Intent intent = new Intent(SignupActivity.this, SignUp02Activity.class);
+                intent.putExtra("userData", userData);
                 startActivity(intent);
                 finish();
             }
@@ -110,13 +125,25 @@ public class SignupActivity extends AppCompatActivity {
         String pw = editPw.getText().toString().trim();
         String pw2 = editPw2.getText().toString().trim();
 
-        boolean enable =
-                !email.isEmpty() &&
-                        !pw.isEmpty() &&
-                        !pw2.isEmpty() &&
-                        pw.equals(pw2) &&
-                        selectedDomainIndex[0] != 0; // 도메인 반드시 선택
+        boolean isEmailValid = !email.isEmpty();
+        boolean isPwMatch = !pw.isEmpty() && pw.equals(pw2);
+        boolean isPwValid = pw.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
+        boolean isDomainSelected = selectedDomainIndex[0] != 0;
 
+        boolean enable = isEmailValid && isPwMatch && isPwValid && isDomainSelected;
         btnNext.setEnabled(enable);
+
+        // 비밀번호가 잘못되었을 경우 사용자에게 알려줌
+        if (!pw.isEmpty() && !isPwValid) {
+            editPw.setError("비밀번호는 영문, 숫자, 특수문자 포함 8자 이상이어야 합니다.");
+        } else {
+            editPw.setError(null); // 에러 해제
+        }
+
+        if (!pw2.isEmpty() && !pw.equals(pw2)) {
+            editPw2.setError("비밀번호가 일치하지 않습니다");
+        } else {
+            editPw2.setError(null);
+        }
     }
 }
