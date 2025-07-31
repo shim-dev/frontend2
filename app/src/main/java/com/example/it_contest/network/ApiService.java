@@ -14,4 +14,10 @@ public interface ApiService {
     @POST("/login")
     Call<JsonObject> loginUser(@Body JsonObject body);
 
+    @POST("/check-email")
+    Call<JsonObject> checkEmail(@Body JsonObject email);
+
+    @POST("/check-nickname")
+    Call<JsonObject> checkNickname(@Body JsonObject nickname);
+
 }
