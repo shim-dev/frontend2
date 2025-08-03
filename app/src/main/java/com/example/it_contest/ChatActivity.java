@@ -12,15 +12,25 @@ import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.ContextThemeWrapper;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
 import android.widget.Button;
+import java.net.HttpURLConnection;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import org.json.JSONException;
+import java.net.URL;
+
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -29,6 +39,7 @@ public class ChatActivity extends AppCompatActivity {
     private AppCompatButton buttonMeal;
     private EditText editTextMessage;
     private ImageButton buttonSend;
+    private String selectedMealType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +66,83 @@ public class ChatActivity extends AppCompatActivity {
                 addAnswerBubble(userMessage);  // 사용자 말풍선 추가
                 editTextMessage.setText("");
 
-                if (userMessage.contains("기록")) {
-                    addRecordOptions();  // ✅ "기록" 포함 시 추가 뷰 출력
+                if (selectedMealType != null) {
+                    sendToBackend(userMessage, selectedMealType);
+                    selectedMealType = null; // 한번 보내고 초기화
+                } else if (userMessage.contains("기록")) {
+                    addRecordOptions();
                 }
             }
         });
         addRecordOptions();
     }
+
+    private void sendToBackend(String message, String mealType) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:5000/chat-meal");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("nickname", "test_user");
+                jsonParam.put("message", message);
+                jsonParam.put("meal_type", mealType);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+                int responseCode = conn.getResponseCode();
+                Log.e("sendToBackend", "서버 응답 코드: " + responseCode);
+
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String errorLine;
+                    while ((errorLine = errorReader.readLine()) != null) {
+                        errorResponse.append(errorLine.trim());
+                    }
+                    Log.e("sendToBackend", "서버 에러 응답: " + errorResponse.toString());
+
+                    runOnUiThread(() -> Toast.makeText(this, "서버 응답 오류: " + responseCode, Toast.LENGTH_SHORT).show());
+                    return;
+                }
+                InputStream is = conn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+
+                JSONObject responseJson = new JSONObject(response.toString());
+                JSONArray foods = responseJson.getJSONArray("foods");
+
+                runOnUiThread(() -> {
+                    try {
+                        StringBuilder result = new StringBuilder("추출된 음식: ");
+                        for (int i = 0; i < foods.length(); i++) {
+                            result.append(foods.getString(i));
+                            if (i < foods.length() - 1) result.append(", ");
+                        }
+                        addBotMessage(result.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "JSON 파싱 오류 발생", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("sendToBackend", "요청 중 오류 발생", e); // 이거 추가!
+                runOnUiThread(() -> Toast.makeText(this, "서버 오류 발생", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+
     private void addWaterTracker() {
         View waterView = getLayoutInflater().inflate(R.layout.water_tracker, chatContainer, false);
         GridLayout waterGrid = waterView.findViewById(R.id.waterGrid);
@@ -160,16 +241,17 @@ public class ChatActivity extends AppCompatActivity {
         // 버튼들
         String[] options = {"🔍 아침", "🌞 점심", "🌙 저녁", "🍪 간식"};
         for (String option : options) {
-            AppCompatButton button = createStyledOptionButton(option); // ✅ 여기서 공통 스타일 메서드 사용
+            AppCompatButton button = createStyledOptionButton(option);
             button.setOnClickListener(v -> {
+                selectedMealType = option.replaceAll("[^가-힣]", "");
+
                 Toast.makeText(this, option + " 선택됨", Toast.LENGTH_SHORT).show();
                 addAnswerBubble(option);
-                addBotPromptForImage(option);// 사용자 선택을 대화창에 출력
+                addBotPromptForImage(option); // 사용자 선택을 대화창에 출력
             });
 
             bubbleLayout.addView(button);
         }
-
         chatContainer.addView(bubbleLayout);
         scrollToBottom();
     }
@@ -359,5 +441,6 @@ public class ChatActivity extends AppCompatActivity {
         return button;
     }
 }
+
 
 
