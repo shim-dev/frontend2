@@ -28,6 +28,9 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import org.json.JSONException;
 import java.net.URL;
 
@@ -255,17 +258,75 @@ public class ChatActivity extends AppCompatActivity {
             String hourStr = editHour.getText().toString().trim();
             String minuteStr = editMinute.getText().toString().trim();
 
-            // 유효성 검사: 빈 값이면 0으로 처리
             int hour = hourStr.isEmpty() ? 0 : Integer.parseInt(hourStr);
             int minute = minuteStr.isEmpty() ? 0 : Integer.parseInt(minuteStr);
 
-            // 선택한 수면 시간 출력
             addAnswerBubble(hour + "시간 " + minute + "분 수면 기록");
             addBotMessage("기록이 완료되었습니다.");
+
+            // 💡 여기에 연동 함수 호출
+            sendSleepRecordToBackend(hour, minute);
         });
 
         chatContainer.addView(sleepView);
         scrollToBottom();
+    }
+
+    private void sendSleepRecordToBackend(int hour, int minute) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:5000/record-sleep");  // 실제 기기면 IP 변경
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("nickname", "test_user");  // 실제 닉네임으로 변경 가능
+                jsonParam.put("hours", hour);
+                jsonParam.put("minutes", minute);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String line;
+                    while ((line = errorReader.readLine()) != null) {
+                        errorResponse.append(line.trim());
+                    }
+
+                    Log.e("SleepRecord", "오류 응답: " + errorResponse.toString());
+                    runOnUiThread(() -> Toast.makeText(this, "수면 기록 실패", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                InputStream is = conn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+
+                JSONObject responseJson = new JSONObject(response.toString());
+                int totalMinutes = responseJson.getInt("total_minutes");
+
+                runOnUiThread(() -> {
+                    int hours = totalMinutes / 60;
+                    int minutes = totalMinutes % 60;
+                    addBotMessage("😴 총 " + hours + "시간 " + minutes + "분 수면 기록 완료!");
+                });
+
+            } catch (Exception e) {
+                Log.e("SleepRecord", "예외 발생", e);
+                runOnUiThread(() -> Toast.makeText(this, "서버 연결 실패", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
     }
 
     private void addBotMessage(String message) {
