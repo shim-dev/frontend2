@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.HorizontalScrollView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -45,11 +46,15 @@ public class recipe_screen_activity extends AppCompatActivity {
         timeInfo = findViewById(R.id.time_info);
         levelInfo = findViewById(R.id.level_info);
         servingInfo = findViewById(R.id.serving_info);
+        HorizontalScrollView hsvIngredients = findViewById(R.id.hsv_ingredients);
 
         // 데이터 받기
         Recipe recipe = (Recipe) getIntent().getSerializableExtra("recipe");
 
         if (recipe != null) {
+
+
+
             tvTitle.setText(recipe.getName());
             tvSteps.setText(formatSteps(recipe.getSteps()));
 
@@ -60,8 +65,9 @@ public class recipe_screen_activity extends AppCompatActivity {
             if (recipe.getLevel() != null) {
                 levelInfo.setText(recipe.getLevel());
             }
-            // int → 문자열 변환
-            servingInfo.setText(recipe.getServing() + "인분");
+            if (recipe.getScore() != 0) {
+                servingInfo.setText(recipe.getScore() + "점");
+            }
 
             // 둥근 모서리 반경(dp → px 변환)
             int radiusInPx = (int) (30 * getResources().getDisplayMetrics().density);
@@ -82,15 +88,31 @@ public class recipe_screen_activity extends AppCompatActivity {
             if (recipe.getIngredients() != null) {
                 int sizeInDp = 80; // 원하는 크기
                 int sizeInPx = (int) (sizeInDp * getResources().getDisplayMetrics().density);
+                int marginInDp = 8; // 음식 사이 간격
+                int marginInPx = (int) (marginInDp * getResources().getDisplayMetrics().density);
 
                 for (int i = 0; i < recipe.getIngredients().size(); i++) {
                     ImageView img = new ImageView(this);
-                    img.setLayoutParams(new LinearLayout.LayoutParams(sizeInPx, sizeInPx));
+
+                    // 마진 포함한 LayoutParams
+                    LinearLayout.LayoutParams params =
+                            new LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+                    params.setMargins(0, 0, marginInPx, 0); // 오른쪽 마진만 적용
+                    img.setLayoutParams(params);
 
                     Glide.with(this)
                             .load(recipe.getIngredients().get(i).getImage())
                             .transform(new CenterCrop(), new RoundedCorners(radiusInPx))
                             .into(img);
+
+
+                    img.setOnClickListener(v -> {
+                        IngredientsBottomSheet sheet = IngredientsBottomSheet.newInstance(
+                                "재료 " + recipe.getIngredients().size(),
+                                recipe.getIngredients()
+                        );
+                        sheet.show(getSupportFragmentManager(), "IngredientsBottomSheet");
+                    });
 
                     layoutIngredients.addView(img);
                 }

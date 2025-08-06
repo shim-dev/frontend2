@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <!-- 재료 이미지 -->
+    <ImageView
+        android:id="@+id/img_ingredient"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/rounded_image_bg"
+        android:layout_marginEnd="8dp" />
+
+    <!-- 텍스트 + 태그 영역 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 재료 이름 -->
+        <TextView
+            android:id="@+id/tv_ingredient_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="냉동 흰다리 새우살 (냉동), 600g"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- 키워드 태그 -->
+        <LinearLayout
+            android:id="@+id/layout_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tag1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="#생산지"
+                android:textSize="10sp"
+                android:padding="4dp"
+                android:background="@drawable/bg_tag"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tag2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="#보관조건"
+                android:textSize="10sp"
+                android:padding="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/bg_tag" />
+
+            <TextView
+                android:id="@+id/tag3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="#추가태그"
+                android:textSize="10sp"
+                android:padding="4dp"
+                android:background="@drawable/bg_tag" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 이동 버튼 -->
+    <Button
+        android:id="@+id/btn_move"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_shopping_button"
+        android:backgroundTint="@color/black"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        />
+</LinearLayout>
