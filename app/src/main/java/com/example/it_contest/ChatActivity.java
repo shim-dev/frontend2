@@ -56,7 +56,11 @@ public class ChatActivity extends AppCompatActivity {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
 
-        // ✅ 필수 뷰 초기화
+        TextView titleDate = findViewById(R.id.titleDate);  // 👈 TextView ID가 실제 XML과 일치해야 함
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
+        String today = sdf.format(new Date());
+        titleDate.setText(today + " 대화");
+
         chatContainer = findViewById(R.id.chatContainer);
         scrollView = findViewById(R.id.scrollView);
         editTextMessage = findViewById(R.id.editTextMessage);
