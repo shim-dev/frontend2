@@ -1,5 +1,6 @@
 package com.example.it_contest;
 
+import android.text.util.Linkify;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -493,9 +494,9 @@ public class ChatActivity extends AppCompatActivity {
         text.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         text.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT  // 높이를 말풍선 높이에 맞추기 위해
+                LinearLayout.LayoutParams.WRAP_CONTENT
         ));
-
+        Linkify.addLinks(text, Linkify.WEB_URLS);
         return text;
     }
 
