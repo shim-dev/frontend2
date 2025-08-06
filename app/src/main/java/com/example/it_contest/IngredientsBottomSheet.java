@@ -4,15 +4,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.example.it_contest.model.Ingredient;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.TextView;
+
+import com.example.it_contest.model.Ingredient;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.util.List;
 
@@ -50,5 +50,15 @@ public class IngredientsBottomSheet extends BottomSheetDialogFragment {
         }
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        View bottomSheet = getDialog().findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (bottomSheet != null) {
+            bottomSheet.setBackground(null); // ✅ 기본 배경 제거
+        }
     }
 }

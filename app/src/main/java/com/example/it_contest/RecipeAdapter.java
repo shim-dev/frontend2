@@ -14,7 +14,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.it_contest.model.Recipe;
+import com.example.it_contest.network.ApiService;
+import com.example.it_contest.network.RetrofitClient;
+
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
@@ -48,9 +55,25 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
                 .transform(new com.bumptech.glide.load.resource.bitmap.RoundedCorners(radiusInPx))
                 .into(holder.imgRecipe);
 
-        // ✅ 클릭 이벤트 추가
+        // ✅ 클릭 이벤트 추가 + 조회수 증가 API 호출
         holder.itemView.setOnClickListener(v -> {
             Log.d("RecipeAdapter", "Clicked: " + recipe.getName());
+
+            // 조회수 증가 API 호출
+            ApiService apiService = RetrofitClient.getApiService();
+            apiService.increaseRecipeView(recipe.get_id()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Log.d("RecipeAdapter", "조회수 +1 성공");
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Log.e("RecipeAdapter", "조회수 증가 실패", t);
+                }
+            });
+
+            // 상세 페이지 이동
             Intent intent = new Intent(holder.itemView.getContext(), recipe_screen_activity.class);
             intent.putExtra("recipe", recipe); // Serializable이므로 가능
             holder.itemView.getContext().startActivity(intent);

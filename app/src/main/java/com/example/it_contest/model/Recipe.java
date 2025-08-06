@@ -3,6 +3,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Recipe implements Serializable { // ✅ Serializable 추가
+
+    private String _id;
     private String name;
     private List<String> keywords;
     private String desc;
@@ -79,5 +81,13 @@ public class Recipe implements Serializable { // ✅ Serializable 추가
 
     public int getViews() { return views; }
     public void setViews(int views) { this.views = views; }
+
+    public String get_id() {
+        return _id;
+    }
+
+    public void set_id(String _id) {
+        this._id = _id;
+    }
 
 }

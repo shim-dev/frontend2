@@ -11,6 +11,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -31,5 +32,14 @@ public interface ApiService {
 
     @GET("/recipes/search")
     Call<List<Recipe>> searchRecipes(@Query("keyword") String keyword);
+
+    @GET("/recipes/search")
+    Call<List<Recipe>> searchRecipes(
+            @Query("keyword") String keyword,
+            @Query("sort") String sort
+    );
+
+    @POST("/recipes/view/{id}")
+    Call<Void> increaseRecipeView(@Path("id") String recipeId);
 
 }

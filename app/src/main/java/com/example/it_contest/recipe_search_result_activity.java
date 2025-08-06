@@ -1,9 +1,12 @@
 package com.example.it_contest;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,60 +34,85 @@ public class recipe_search_result_activity extends AppCompatActivity {
     private RecipeAdapter adapter;
     private List<Recipe> recipeList = new ArrayList<>();
     private String keyword;
+    private TextView tvLatest, tvViews; // ✅ 추가
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recipe_search_result); // XML 파일명
+        setContentView(R.layout.recipe_search_result);
 
-        // 첫 화면에서 전달받은 검색어
         keyword = getIntent().getStringExtra("keyword");
 
-        // 뷰 연결
         etSearch = findViewById(R.id.et_search);
         btnSearch = findViewById(R.id.btn_search);
         btnBack = findViewById(R.id.btn_back);
         btnClear = findViewById(R.id.btn_clear);
         rvRecipes = findViewById(R.id.rv_recipes);
+        tvLatest = findViewById(R.id.tv_latest); // ✅ 추가
+        tvViews = findViewById(R.id.tv_views);   // ✅ 추가
 
-        // 검색어 입력창에 세팅
         etSearch.setText(keyword);
 
-        // RecyclerView 설정
         rvRecipes.setLayoutManager(new LinearLayoutManager(this));
-
         adapter = new RecipeAdapter(recipeList);
         rvRecipes.setAdapter(adapter);
 
-        // 뒤로가기 버튼
         btnBack.setOnClickListener(v -> finish());
 
-        // 검색 버튼 클릭
         btnSearch.setOnClickListener(v -> {
             String newKeyword = etSearch.getText().toString().trim();
             if (!newKeyword.isEmpty()) {
-                searchFromDB(newKeyword);
+                searchFromDB(newKeyword, "latest"); // 기본 최신순
+                setSortSelection(true);
             } else {
                 Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 검색창 X 버튼
         btnClear.setOnClickListener(v -> etSearch.setText(""));
 
-        // 처음 화면 진입 시 바로 검색
+        // 최신순 클릭
+        tvLatest.setOnClickListener(v -> {
+            setSortSelection(true);
+            searchFromDB(keyword, "latest");
+        });
+
+        // 조회순 클릭
+        tvViews.setOnClickListener(v -> {
+            setSortSelection(false);
+            searchFromDB(keyword, "views");
+        });
+
+        // 처음 화면 진입 시 최신순 검색
         if (keyword != null && !keyword.isEmpty()) {
-            searchFromDB(keyword);
+            setSortSelection(true);
+            searchFromDB(keyword, "latest");
         }
     }
 
-    private void searchFromDB(String keyword) {
+    // ✅ 정렬 버튼 색상/굵기 변경
+    private void setSortSelection(boolean isLatest) {
+        if (isLatest) {
+            tvLatest.setTextColor(Color.BLACK);
+            tvLatest.setTypeface(null, Typeface.BOLD);
+            tvViews.setTextColor(Color.parseColor("#999999"));
+            tvViews.setTypeface(null, Typeface.NORMAL);
+        } else {
+            tvViews.setTextColor(Color.BLACK);
+            tvViews.setTypeface(null, Typeface.BOLD);
+            tvLatest.setTextColor(Color.parseColor("#999999"));
+            tvLatest.setTypeface(null, Typeface.NORMAL);
+        }
+    }
+
+    // ✅ 정렬 옵션 추가된 검색 메서드
+    private void searchFromDB(String keyword, String sort) {
         ApiService apiService = RetrofitClient.getApiService();
-        apiService.searchRecipes(keyword).enqueue(new Callback<List<Recipe>>() {
+        apiService.searchRecipes(keyword, sort).enqueue(new Callback<List<Recipe>>() {
             @Override
             public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("API_RESPONSE", "응답 데이터: " + new Gson().toJson(response.body())); // ✅ 응답 찍기
+                    Log.d("API_RESPONSE", "응답 데이터: " + new Gson().toJson(response.body()));
                     recipeList.clear();
                     recipeList.addAll(response.body());
                     adapter.notifyDataSetChanged();
