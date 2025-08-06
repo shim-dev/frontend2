@@ -177,13 +177,72 @@ public class ChatActivity extends AppCompatActivity {
                     count++;
                 }
             }
+
             Toast.makeText(this, "오늘 마신 물: " + count + "잔", Toast.LENGTH_SHORT).show();
             addBotMessage("기록이 완료되었습니다.");
+
+            // 💧 여기에 서버로 전송
+            sendWaterRecordToBackend(count);
         });
 
         chatContainer.addView(waterView);
         scrollToBottom();
     }
+
+    private void sendWaterRecordToBackend(int count) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:5000/record-water");  // ← 실제 기기면 IP로 변경
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("nickname", "test_user");  // 실제 닉네임으로 바꿔도 됨
+                jsonParam.put("cups", count);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String line;
+                    while ((line = errorReader.readLine()) != null) {
+                        errorResponse.append(line.trim());
+                    }
+
+                    Log.e("WaterRecord", "오류 응답: " + errorResponse.toString());
+                    runOnUiThread(() -> Toast.makeText(this, "물 기록 실패", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                InputStream is = conn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+
+                JSONObject responseJson = new JSONObject(response.toString());
+                int dailyTotal = responseJson.getInt("daily_total");
+
+                runOnUiThread(() -> {
+                    addBotMessage("총 " + count + "잔이 기록되었고,\n오늘 누적: " + dailyTotal + "잔입니다!");
+                });
+
+            } catch (Exception e) {
+                Log.e("WaterRecord", "예외 발생", e);
+                runOnUiThread(() -> Toast.makeText(this, "서버 연결 실패", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
 
     private void addSleepTracker() {
         View sleepView = getLayoutInflater().inflate(R.layout.sleep_tracker, chatContainer, false);
@@ -378,7 +437,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addBotPromptForImage(String mealText) {
-        String prompt = mealText + "의 사진을 기록해주세요!";
+        String prompt = mealText + "은 무얼 먹었나요?";
         addBotMessage(prompt);  // 기존 봇 메시지 함수 재활용
     }
 
