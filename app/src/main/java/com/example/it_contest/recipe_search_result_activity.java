@@ -13,14 +13,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.it_contest.model.Recipe;
 import com.example.it_contest.network.ApiService;
 import com.example.it_contest.network.RetrofitClient;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,7 +35,10 @@ public class recipe_search_result_activity extends AppCompatActivity {
     private RecipeAdapter adapter;
     private List<Recipe> recipeList = new ArrayList<>();
     private String keyword;
-    private TextView tvLatest, tvViews; // ✅ 추가
+    private TextView tvLatest, tvViews;
+
+    // ✅ 추가: ApiService (검색 기록 저장용)
+    private ApiService apiServiceHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +52,8 @@ public class recipe_search_result_activity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnClear = findViewById(R.id.btn_clear);
         rvRecipes = findViewById(R.id.rv_recipes);
-        tvLatest = findViewById(R.id.tv_latest); // ✅ 추가
-        tvViews = findViewById(R.id.tv_views);   // ✅ 추가
+        tvLatest = findViewById(R.id.tv_latest);
+        tvViews = findViewById(R.id.tv_views);
 
         etSearch.setText(keyword);
 
@@ -57,11 +61,15 @@ public class recipe_search_result_activity extends AppCompatActivity {
         adapter = new RecipeAdapter(recipeList);
         rvRecipes.setAdapter(adapter);
 
+        // ✅ 추가: ApiService 초기화
+        apiServiceHistory = RetrofitClient.getApiService();
+
         btnBack.setOnClickListener(v -> finish());
 
         btnSearch.setOnClickListener(v -> {
             String newKeyword = etSearch.getText().toString().trim();
             if (!newKeyword.isEmpty()) {
+                saveSearchToDB(apiServiceHistory, newKeyword); // ✅ 검색 기록 저장
                 searchFromDB(newKeyword, "latest"); // 기본 최신순
                 setSortSelection(true);
             } else {
@@ -74,23 +82,36 @@ public class recipe_search_result_activity extends AppCompatActivity {
         // 최신순 클릭
         tvLatest.setOnClickListener(v -> {
             setSortSelection(true);
-            searchFromDB(keyword, "latest");
+            String currentKeyword = etSearch.getText().toString().trim();
+            if (!currentKeyword.isEmpty()) {
+                saveSearchToDB(apiServiceHistory, currentKeyword); // ✅ 검색 기록 저장
+                searchFromDB(currentKeyword, "latest");
+            } else {
+                Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // 조회순 클릭
         tvViews.setOnClickListener(v -> {
             setSortSelection(false);
-            searchFromDB(keyword, "views");
+            String currentKeyword = etSearch.getText().toString().trim();
+            if (!currentKeyword.isEmpty()) {
+                saveSearchToDB(apiServiceHistory, currentKeyword); // ✅ 검색 기록 저장
+                searchFromDB(currentKeyword, "views");
+            } else {
+                Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // 처음 화면 진입 시 최신순 검색
         if (keyword != null && !keyword.isEmpty()) {
             setSortSelection(true);
+            saveSearchToDB(apiServiceHistory, keyword); // ✅ 첫 진입 시도 저장
             searchFromDB(keyword, "latest");
         }
     }
 
-    // ✅ 정렬 버튼 색상/굵기 변경
+    // 정렬 버튼 색상/굵기 변경
     private void setSortSelection(boolean isLatest) {
         if (isLatest) {
             tvLatest.setTextColor(Color.BLACK);
@@ -105,7 +126,7 @@ public class recipe_search_result_activity extends AppCompatActivity {
         }
     }
 
-    // ✅ 정렬 옵션 추가된 검색 메서드
+    // 정렬 옵션 추가된 검색 메서드
     private void searchFromDB(String keyword, String sort) {
         ApiService apiService = RetrofitClient.getApiService();
         apiService.searchRecipes(keyword, sort).enqueue(new Callback<List<Recipe>>() {
@@ -125,6 +146,24 @@ public class recipe_search_result_activity extends AppCompatActivity {
             public void onFailure(Call<List<Recipe>> call, Throwable t) {
                 t.printStackTrace();
                 Toast.makeText(recipe_search_result_activity.this, "서버 연결 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ✅ 검색어 저장 메서드
+    private void saveSearchToDB(ApiService apiService, String keyword) {
+        Map<String, String> body = new HashMap<>();
+        body.put("keyword", keyword);
+
+        apiService.addSearchHistory(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.d("SEARCH_HISTORY", "검색어 저장 성공: " + keyword);
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("SEARCH_HISTORY", "검색어 저장 실패: " + t.getMessage());
             }
         });
     }

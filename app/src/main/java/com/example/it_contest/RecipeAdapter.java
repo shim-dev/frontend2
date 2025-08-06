@@ -44,9 +44,9 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
         holder.tvTitle.setText(recipe.getName());
         holder.tvDescription.setText(recipe.getDesc());
-        holder.tvTime.setText(recipe.getTime() + " 분");
-        holder.tvLevel.setText(recipe.getLevel());
-        holder.tvServing.setText(recipe.getServing() + "인분");
+        holder.tvTime.setText("⏱\uFE0F "+ recipe.getTime() + " 분");
+        holder.tvLevel.setText("\uD83D\uDD25 "+recipe.getLevel());
+        holder.tvServing.setText("\uD83C\uDF7D\uFE0F "+recipe.getServing() + "인분");
 
         int radiusInPx = (int) (50 * holder.itemView.getResources().getDisplayMetrics().density);
 
