@@ -486,12 +486,14 @@ public class ChatActivity extends AppCompatActivity {
         text.setTextSize(16f);
         text.setTypeface(null, Typeface.BOLD);
         text.setTextColor(Color.BLACK);
-        text.setPadding(16, 0, 0, 0);
-
-        text.setGravity(Gravity.CENTER_VERTICAL);
+        text.setPadding(16, 16, 0, 0);
+        text.setSingleLine(false);     // 한 줄로 제한하지 않음
+        text.setEllipsize(null);       // 말줄임표 없음
+        text.setLineSpacing(6f, 1f);
+        text.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         text.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.MATCH_PARENT  // 높이를 말풍선 높이에 맞추기 위해
+                LinearLayout.LayoutParams.WRAP_CONTENT  // 높이를 말풍선 높이에 맞추기 위해
         ));
 
         return text;
@@ -535,14 +537,69 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         buttonNews.setOnClickListener(v -> {
-            addAnswerBubble("📰 저속노화 소식");
-            addBotMessage("최신 건강 뉴스로 이동할게요!");
+            addBotMessage("최신 저속노화 뉴스 3건을 가져올게요!");
+            sendNewsRequestToBackend();
         });
 
         // 전체 View를 대화에 추가
         chatContainer.addView(recordView);
         scrollToBottom();
     }
+
+    private void sendNewsRequestToBackend() {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:5000/news");  // 실제 기기면 IP 변경
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("nickname", "test_user");
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    runOnUiThread(() -> Toast.makeText(this, "뉴스 요청 실패", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                InputStream is = conn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+
+                JSONObject json = new JSONObject(response.toString());
+                JSONArray newsArray = json.getJSONArray("news");
+
+                runOnUiThread(() -> {
+                    for (int i = 0; i < newsArray.length(); i++) {
+                        try {
+                            JSONObject item = newsArray.getJSONObject(i);
+                            String title = item.getString("title");
+                            String urlStr = item.getString("url");
+                            String message = "📰 " + title + "\n🔗 " + urlStr;
+                            addBotMessage(message);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("NewsRequest", "오류 발생", e);
+                runOnUiThread(() -> Toast.makeText(this, "서버 오류 발생", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
 
     private AppCompatButton createRecordButton(String text, View.OnClickListener listener) {
         AppCompatButton button = new AppCompatButton(this);
