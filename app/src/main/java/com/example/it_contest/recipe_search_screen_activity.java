@@ -3,14 +3,13 @@ package com.example.it_contest;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,29 +28,33 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class recipe_search_screen_activity extends AppCompatActivity {
+public class recipe_search_screen_activity extends BaseActivity {
 
     private LinearLayout layoutKeywords;
     private EditText etSearch;
     private ImageView btnSearch;
 
-    // ✅ 최근 검색 관련
     private RecyclerView rvRecent;
     private RecentSearchAdapter recentAdapter;
     private List<String> recentList = new ArrayList<>();
     private ApiService apiService;
 
+    // ✅ FAB 관련
+    private ImageButton btnFabMain, btnFabWrite, btnFabLocation;
+    private LinearLayout layoutFabWrite, layoutFabLocation;
+    private boolean isFabOpen = false;
+
     @Override
     protected void onResume() {
         super.onResume();
-        loadRecentSearchFromDB(); // ✅ 화면 재진입 시 DB에서 다시 불러오기
+        loadRecentSearchFromDB();
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_search_screen);
+        setupBottomNavigation("community");
 
         layoutKeywords = findViewById(R.id.layout_keywords);
         etSearch = findViewById(R.id.et_search);
@@ -60,10 +63,9 @@ public class recipe_search_screen_activity extends AppCompatActivity {
 
         apiService = RetrofitClient.getApiService();
 
-        // ✅ RecyclerView 먼저 세팅
+        // ✅ 최근 검색 RecyclerView 세팅
         setupRecentSearchRecycler();
 
-        // ✅ 데이터 로드
         loadRecentSearchFromDB();
         loadKeywordsFromDB();
 
@@ -78,9 +80,47 @@ public class recipe_search_screen_activity extends AppCompatActivity {
                 Toast.makeText(this, "검색어를 입력하세요.", Toast.LENGTH_SHORT).show();
             }
         });
+
+        // ✅ FAB 연결
+        setupFabButtons();
     }
 
-    // ✅ RecyclerView 세팅
+    // ✅ FAB 초기화 및 클릭 이벤트
+    private void setupFabButtons() {
+        btnFabMain = findViewById(R.id.btn_fab_main);
+        btnFabWrite = findViewById(R.id.btn_fab_write);
+        btnFabLocation = findViewById(R.id.btn_fab_location);
+        layoutFabWrite = findViewById(R.id.layout_fab_write);
+        layoutFabLocation = findViewById(R.id.layout_fab_location);
+
+        btnFabMain.setOnClickListener(v -> {
+            if (isFabOpen) {
+                layoutFabWrite.setVisibility(LinearLayout.GONE);
+                layoutFabLocation.setVisibility(LinearLayout.GONE);
+                btnFabMain.setImageResource(R.drawable.ic_float_logo);
+            } else {
+                layoutFabWrite.setVisibility(LinearLayout.VISIBLE);
+                layoutFabLocation.setVisibility(LinearLayout.VISIBLE);
+                btnFabMain.setImageResource(R.drawable.ic_float_logo_close);
+            }
+            isFabOpen = !isFabOpen;
+        });
+
+        btnFabWrite.setOnClickListener(v -> {
+            Toast.makeText(this, "게시글 작성 화면으로 이동!", Toast.LENGTH_SHORT).show();
+            // 이동하려고 하는 페이지 (수아 언니 연결)
+            //Todo
+            // startActivity(new Intent(this, WriteActivity.class));
+        });
+
+        btnFabLocation.setOnClickListener(v -> {
+            Toast.makeText(this, "주변 저속노화 맛집 찾기!", Toast.LENGTH_SHORT).show();
+            // 이동하려고 하는 페이지 (채림 언니 연결)
+            //Todo
+            // startActivity(new Intent(this, LocationSearchActivity.class));
+        });
+    }
+
     private void setupRecentSearchRecycler() {
         recentAdapter = new RecentSearchAdapter(recentList, position -> {
             String keyword = recentList.get(position);
@@ -98,7 +138,6 @@ public class recipe_search_screen_activity extends AppCompatActivity {
         rvRecent.setLayoutManager(new LinearLayoutManager(this));
         rvRecent.setAdapter(recentAdapter);
 
-        // 전체 삭제 버튼 클릭
         findViewById(R.id.tv_clear_all).setOnClickListener(v -> {
             apiService.clearSearchHistory().enqueue(new Callback<Void>() {
                 @Override
@@ -112,14 +151,13 @@ public class recipe_search_screen_activity extends AppCompatActivity {
         });
     }
 
-    // ✅ DB에서 최근 검색 불러오기
     private void loadRecentSearchFromDB() {
         apiService.getSearchHistory().enqueue(new Callback<List<SearchHistory>>() {
             @Override
             public void onResponse(Call<List<SearchHistory>> call, Response<List<SearchHistory>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     recentList.clear();
-                    Set<String> seen = new HashSet<>(); // ✅ 중복 체크용
+                    Set<String> seen = new HashSet<>();
                     for (SearchHistory item : response.body()) {
                         String kw = item.getKeyword();
                         if (kw != null && !kw.isEmpty() && !seen.contains(kw)) {
@@ -135,9 +173,6 @@ public class recipe_search_screen_activity extends AppCompatActivity {
         });
     }
 
-
-
-    // ✅ 검색 시 DB에 저장
     private void saveSearchToDB(String keyword) {
         Map<String, String> body = new HashMap<>();
         body.put("keyword", keyword);
@@ -145,14 +180,13 @@ public class recipe_search_screen_activity extends AppCompatActivity {
         apiService.addSearchHistory(body).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                loadRecentSearchFromDB(); // 저장 후 UI 갱신
+                loadRecentSearchFromDB();
             }
             @Override
             public void onFailure(Call<Void> call, Throwable t) {}
         });
     }
 
-    // 기존 키워드 불러오기
     private void loadKeywordsFromDB() {
         apiService.getKeywords().enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -178,7 +212,6 @@ public class recipe_search_screen_activity extends AppCompatActivity {
         });
     }
 
-    // 기존 키워드 태그 추가
     private void addKeywordTag(String keyword) {
         TextView tag = new TextView(this);
         tag.setText("# " + keyword);
