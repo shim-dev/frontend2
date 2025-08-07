@@ -1,5 +1,6 @@
 package com.example.it_contest;
 
+import androidx.appcompat.app.AlertDialog;
 import android.text.util.Linkify;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -34,7 +35,15 @@ import java.util.Date;
 import java.util.Locale;
 import org.json.JSONException;
 import java.net.URL;
-
+import android.net.Uri;
+import android.content.Intent;
+import android.provider.MediaStore;
+import androidx.core.content.FileProvider;
+import java.io.File;
+import java.io.IOException;
+import android.os.Environment;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -44,6 +53,10 @@ public class ChatActivity extends AppCompatActivity {
     private EditText editTextMessage;
     private ImageButton buttonSend;
     private String selectedMealType = null;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_PICK = 2;
+    private Uri photoUri;
+    private String currentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +70,7 @@ public class ChatActivity extends AppCompatActivity {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
 
-        TextView titleDate = findViewById(R.id.titleDate);  // 👈 TextView ID가 실제 XML과 일치해야 함
+        TextView titleDate = findViewById(R.id.titleDate);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
         String today = sdf.format(new Date());
         titleDate.setText(today + " 대화");
@@ -66,6 +79,9 @@ public class ChatActivity extends AppCompatActivity {
         scrollView = findViewById(R.id.scrollView);
         editTextMessage = findViewById(R.id.editTextMessage);
         buttonSend = findViewById(R.id.buttonSend);
+
+        ImageButton buttonCamera = findViewById(R.id.buttonCamera);
+        buttonCamera.setOnClickListener(v -> showImagePickerDialog());
 
         // 전송 버튼 이벤트
         buttonSend.setOnClickListener(v -> {
@@ -379,6 +395,178 @@ public class ChatActivity extends AppCompatActivity {
         }
         chatContainer.addView(bubbleLayout);
         scrollToBottom();
+    }
+
+    private void showImagePickerDialog() {
+        String[] options = {"📷 카메라로 촬영", "🖼 갤러리에서 선택"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("사진을 선택하세요")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        dispatchTakePictureIntent();
+                    } else {
+                        Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(pickIntent, REQUEST_IMAGE_PICK);
+                    }
+                })
+                .show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                Toast.makeText(this, "파일 생성 실패", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (photoFile != null) {
+                photoUri = FileProvider.getUriForFile(this,
+                        "com.example.it_contest.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void uploadImageToServer(Uri imageUri) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        String fileName = "meal_" + System.currentTimeMillis() + ".jpg";
+        StorageReference imageRef = storageRef.child("images/" + fileName);
+
+        imageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String imageUrl = uri.toString();
+                        Log.d("uploadImage", "Firebase URL: " + imageUrl);
+                        sendImageToChatMeal(imageUrl);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("uploadImage", "❌ Firebase 업로드 실패", e);  // 에러 전체 로그 출력
+                    Toast.makeText(this, "Firebase 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    private void sendImageToChatMeal(String imageUrl) {
+        new Thread(() -> {
+            try {
+                URL url = new URL("http://10.0.2.2:5000/chat-meal");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("nickname", "test_user");
+                jsonParam.put("meal_type", selectedMealType != null ? selectedMealType : "");
+                jsonParam.put("message", "");
+                jsonParam.put("image_url", imageUrl);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    runOnUiThread(() -> Toast.makeText(this, "서버 응답 오류", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                InputStream is = conn.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    response.append(line.trim());
+                }
+
+                JSONObject responseJson = new JSONObject(response.toString());
+                JSONArray foods = responseJson.getJSONArray("foods");
+
+                runOnUiThread(() -> {
+                    try {
+                        StringBuilder foodListStr = new StringBuilder();
+                        for (int i = 0; i < foods.length(); i++) {
+                            foodListStr.append(foods.getString(i));
+                            if (i < foods.length() - 1) foodListStr.append(", ");
+                        }
+
+                        // 👉 Gemini 분석 결과 확인 메시지 출력
+                        addBotMessage("먹으신 음식이 \"" + foodListStr + "\" 맞으신가요?");
+                        addConfirmationButtons(imageUrl); // ✔️ / ❌ 버튼
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("sendImageToChatMeal", "서버 오류", e);
+                runOnUiThread(() -> Toast.makeText(this, "서버 연결 실패", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+    private void addConfirmationButtons(String imageUrl) {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setGravity(Gravity.START);
+        layout.setPadding(16, 8, 16, 8);
+
+        AppCompatButton buttonYes = new AppCompatButton(this);
+        buttonYes.setText("✅ 맞아요");
+        buttonYes.setOnClickListener(v -> {
+            addAnswerBubble("✅ 맞아요");
+            addBotMessage("식단 기록이 완료되었습니다!");
+            // 🔥 이미 기록은 서버에서 됐으므로 별도 처리 X
+        });
+
+        AppCompatButton buttonNo = new AppCompatButton(this);
+        buttonNo.setText("❌ 아니에요");
+        buttonNo.setOnClickListener(v -> {
+            addAnswerBubble("❌ 아니에요");
+            addBotMessage("다시 입력해 주세요.");
+            addMealOptions();
+        });
+
+        layout.addView(buttonYes);
+        layout.addView(buttonNo);
+        chatContainer.addView(layout);
+        scrollToBottom();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_PICK && data != null) {
+                Uri selectedImageUri = data.getData();
+                if (selectedImageUri != null) {
+                    uploadImageToServer(selectedImageUri);  // 업로드 함수 호출
+                    addBotMessage("선택한 사진을 업로드 중입니다...");
+                }
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                if (photoUri != null) {
+                    uploadImageToServer(photoUri);
+                    addBotMessage("촬영한 사진을 업로드 중입니다...");
+                }
+            }
+        } else {
+            Toast.makeText(this, "이미지 선택/촬영이 취소되었습니다", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private AppCompatButton createStyledOptionButton(String text) {
