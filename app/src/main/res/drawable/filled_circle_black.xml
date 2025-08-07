@@ -1,0 +1,17 @@
+<!-- res/drawable/filled_dotted_circle_black.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#CC000000" /> <!-- 반투명 검정 -->
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <stroke
+                android:width="2dp"
+                android:color="@android:color/black"
+                android:dashWidth="4dp"
+                android:dashGap="2dp" />
+        </shape>
+    </item>
+</layer-list>
