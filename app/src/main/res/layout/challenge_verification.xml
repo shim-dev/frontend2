@@ -41,19 +41,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_point" />
 
-            <TextView
-                android:id="@+id/point"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="700 P"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginStart="4dp" />
         </LinearLayout>
 
     </LinearLayout>
