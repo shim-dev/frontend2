@@ -47,4 +47,6 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-storage")
+
 }
