@@ -11,11 +11,14 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        // 지도 SDK 전용 repo
+        maven(url = uri("https://devrepo.kakao.com/nexus/content/groups/public/"))
     }
 }
 
