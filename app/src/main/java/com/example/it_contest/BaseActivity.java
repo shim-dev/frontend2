@@ -59,9 +59,10 @@ public class BaseActivity extends AppCompatActivity {
         menuCommunity.setOnClickListener(v -> {
             if (!selected.equals("community")) {
                 // TODO: CommunityActivity로 이동
-                // startActivity(new Intent(this, CommunityActivity.class));
+                startActivity(new Intent(this, recipe_search_screen_activity.class));
             }
         });
+
 
         menuChallenge.setOnClickListener(v -> {
             // challenge는 항상 ChallengeActivity로 이동하도록 (selected 체크 안 함)
@@ -88,4 +89,5 @@ public class BaseActivity extends AppCompatActivity {
         textChallenge.setVisibility(selected.equals("challenge") ? View.VISIBLE : View.GONE);
         textMy.setVisibility(selected.equals("my") ? View.VISIBLE : View.GONE);
     }
+
 }
