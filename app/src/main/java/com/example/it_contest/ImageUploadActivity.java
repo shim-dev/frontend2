@@ -3,8 +3,11 @@ package com.example.it_contest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
@@ -16,10 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.it_contest.network.ApiService;
 import com.example.it_contest.network.RetrofitClient;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
@@ -40,10 +44,16 @@ public class ImageUploadActivity extends BaseActivity {
     private Uri selectedImageUri;
     private ImageButton backButton;
 
-
     private String challengeId;
     private int todayDay;
     private int goalSteps;
+
+    // 로그인 닉네임
+    private String nickname;
+
+    // 폴링용 핸들러/러너블(메모리 누수 방지 위해 필드로 보관)
+    private Handler pollingHandler;
+    private Runnable pollingRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +61,10 @@ public class ImageUploadActivity extends BaseActivity {
         setContentView(R.layout.activity_image_upload);
         setupBottomNavigation("challenge");
 
-        iconView = findViewById(R.id.image_preview_icon); // 아이콘 자체
+        iconView = findViewById(R.id.image_preview_icon);
         uploadText = findViewById(R.id.upload_text);
-        uploadArea = findViewById(R.id.image_preview_area);           // 박스 전체 클릭 가능
-        imageView = findViewById(R.id.image_preview);       // 실제 미리보기에 쓰일 이미지
+        uploadArea = findViewById(R.id.image_preview_area);
+        imageView = findViewById(R.id.image_preview);
         uploadButton = findViewById(R.id.upload_button);
         backButton = findViewById(R.id.back_button);
 
@@ -63,34 +73,30 @@ public class ImageUploadActivity extends BaseActivity {
         challengeId = getIntent().getStringExtra("challenge_id");
         todayDay = getIntent().getIntExtra("today_day", 1);
         goalSteps = getIntent().getIntExtra("goal_steps", 5000);
+        nickname = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("nickname", "");
 
-        // 업로드 박스를 클릭하면 이미지 선택창 열기
         uploadArea.setOnClickListener(v -> openFileChooser());
 
-
-        // 업로드 버튼
         uploadButton.setOnClickListener(v -> {
-            if (selectedImageUri != null) {
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
-                    uploadImageToServer(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Toast.makeText(this, "이미지를 선택해주세요.", Toast.LENGTH_SHORT).show();
+            if (selectedImageUri == null) {
+                Toast.makeText(ImageUploadActivity.this, "이미지를 선택해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                uploadImageToServer(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(ImageUploadActivity.this, "이미지 로드 실패", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-
 
     private void openFileChooser() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -99,59 +105,138 @@ public class ImageUploadActivity extends BaseActivity {
             selectedImageUri = data.getData();
             imageView.setImageURI(selectedImageUri);
 
-            // 이미지 미리보기 보이게
             imageView.setVisibility(View.VISIBLE);
-
-            // 아이콘 & 텍스트 숨기기
             iconView.setVisibility(View.GONE);
             uploadText.setVisibility(View.GONE);
         }
     }
 
-
-
     private void uploadImageToServer(Bitmap bitmap) {
-        // 비트맵을 Base64로 인코딩
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos);
-        byte[] imageBytes = baos.toByteArray();
-        String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        // 전송 최적화: 1080px 너비로 스케일 + JPEG 85%
+        String base64Image = bitmapToBase64Compressed(bitmap, 1080, 85);
 
-        // 서버로 전송할 데이터 구성
         JsonObject json = new JsonObject();
         json.addProperty("image", base64Image);
         json.addProperty("challenge_id", challengeId);
         json.addProperty("today_day", todayDay);
         json.addProperty("goal_steps", goalSteps);
-        json.addProperty("nickname", getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("nickname", ""));
+        json.addProperty("nickname", nickname);
 
         ApiService apiService = RetrofitClient.getApiService();
         apiService.verifyChallengeImage(json).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    boolean success = response.body().get("success").getAsBoolean();
-                    if (success) {
-                        Toast.makeText(ImageUploadActivity.this, "인증 성공!", Toast.LENGTH_SHORT).show();
-
-                        //  인증 성공 여부를 결과로 전달
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("verified", true);
-                        setResult(Activity.RESULT_OK, resultIntent);
-
-                        finish();  // ChallengeVerificationActivity로 돌아감
-                    } else {
-                        Toast.makeText(ImageUploadActivity.this, "인증 실패: 걸음 수 부족", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
+                if (!response.isSuccessful() || response.body() == null) {
                     Toast.makeText(ImageUploadActivity.this, "서버 응답 오류", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                boolean success = response.body().get("success").getAsBoolean();
+                if (success) {
+                    Toast.makeText(ImageUploadActivity.this, "인증 성공!", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("verified", true);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
+                } else {
+                    Toast.makeText(ImageUploadActivity.this, "인증 실패: 걸음 수 부족", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                Toast.makeText(ImageUploadActivity.this, "서버 연결 실패: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (t instanceof java.net.SocketTimeoutException) {
+                    // 타임아웃 → 서버는 처리했을 수 있으니 폴링으로 확인
+                    startStatusPolling(challengeId, nickname, todayDay);
+                } else {
+                    Toast.makeText(ImageUploadActivity.this, "업로드 실패: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    /**
+     * 인증 결과 폴링: 2.5초 간격으로 최대 6회(≈15초)
+     */
+    private void startStatusPolling(String challengeId, String nickname, int todayDay) {
+        ApiService api = RetrofitClient.getApiService();
+
+        pollingHandler = new Handler(Looper.getMainLooper());
+        final int[] tries = {0};
+        final int maxTries = 6;
+        final long interval = 2500L;
+
+        pollingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                api.getChallengeVerificationStatus(challengeId, nickname)
+                        .enqueue(new Callback<JsonObject>() {
+                            @Override
+                            public void onResponse(Call<JsonObject> call, Response<JsonObject> res) {
+                                if (res.isSuccessful() && res.body() != null) {
+                                    JsonArray arr = res.body().getAsJsonArray("certified_days");
+                                    boolean ok = false;
+                                    for (JsonElement e : arr) {
+                                        try {
+                                            if (Integer.parseInt(e.getAsString()) == todayDay) {
+                                                ok = true;
+                                                break;
+                                            }
+                                        } catch (NumberFormatException ignore) {}
+                                    }
+                                    if (ok) {
+                                        Intent i = new Intent();
+                                        i.putExtra("verified", true);
+                                        setResult(RESULT_OK, i);
+                                        finish();
+                                        return;
+                                    }
+                                }
+                                if (++tries[0] < maxTries) {
+                                    pollingHandler.postDelayed(pollingRunnable, interval);
+                                } else {
+                                    Toast.makeText(ImageUploadActivity.this, "인증 처리 지연 중입니다. 잠시 후 다시 확인해주세요.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<JsonObject> call, Throwable t) {
+                                if (++tries[0] < maxTries) {
+                                    pollingHandler.postDelayed(pollingRunnable, interval);
+                                } else {
+                                    Toast.makeText(ImageUploadActivity.this, "서버 통신 오류", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+        };
+
+        pollingHandler.post(pollingRunnable);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (pollingHandler != null && pollingRunnable != null) {
+            pollingHandler.removeCallbacks(pollingRunnable);
+        }
+        super.onDestroy();
+    }
+
+    // --------- 유틸: 비트맵 압축/인코딩 ---------
+    private String bitmapToBase64Compressed(Bitmap src, int targetWidth, int jpegQuality) {
+        if (src == null) return "";
+
+        int w = src.getWidth();
+        int h = src.getHeight();
+        if (w > targetWidth) {
+            float scale = targetWidth / (float) w;
+            Matrix m = new Matrix();
+            m.postScale(scale, scale);
+            src = Bitmap.createBitmap(src, 0, 0, w, h, m, true);
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        src.compress(Bitmap.CompressFormat.JPEG, jpegQuality, baos);
+        byte[] bytes = baos.toByteArray();
+        return Base64.encodeToString(bytes, Base64.NO_WRAP); // 줄바꿈 제거
     }
 }
