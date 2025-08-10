@@ -38,6 +38,13 @@
         <activity android:name=".recipe_search_result_activity"/>
         <activity android:name=".recipe_screen_activity"/>
         <activity android:name=".recipe_search_screen_activity"/>
+        <activity android:name=".ChallengeActivity"/>
+        <activity android:name=".ChallengeDetailActivity"/>
+        <activity android:name=".ChallengePartActivity"/>
+        <activity android:name=".ChallengeVerificationActivity"/>
+        <activity android:name=".PointChargeActivity"/>
+        <activity android:name=".PointHistoryActivity"/>
+        <activity android:name=".PointMainActivity"/>
 
 
     </application>
