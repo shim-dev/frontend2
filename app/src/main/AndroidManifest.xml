@@ -46,6 +46,9 @@
         <activity android:name=".SignUp08Activity"/>
         <activity android:name=".SignUp09Activity"/>
         <activity android:name=".SignUp10Activity"/>
+        <activity android:name=".recipe_search_result_activity"/>
+        <activity android:name=".recipe_screen_activity"/>
+        <activity android:name=".recipe_search_screen_activity"/>
         <activity android:name=".ChallengeActivity"/>
         <activity android:name=".ChallengeDetailActivity"/>
         <activity android:name=".ChallengePartActivity"/>

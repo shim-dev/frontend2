@@ -51,11 +51,16 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
     //("androidx.health.connect:connect-client:1.2.0-alpha01")
     implementation ("io.github.bootpay:android:4.9.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
    implementation ("com.kakao.maps.open:android:2.12.8")
+
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
 }
