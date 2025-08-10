@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- 방법 A: 개발 단계 전체 HTTP 허용 -->
+    <base-config cleartextTrafficPermitted="true" />
+
+    <!-- 방법 B: 특정 도메인/IP만 허용 (권장) -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">121.129.238.138</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- EC2 쓰면 여기도 추가 -->
+        <!-- <domain includeSubdomains="true">ec2-xx-xx-xx-xx.ap-northeast-2.compute.amazonaws.com</domain> -->
     </domain-config>
 </network-security-config>

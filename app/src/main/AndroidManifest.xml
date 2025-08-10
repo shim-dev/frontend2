@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -37,6 +38,7 @@
         <activity android:name=".SignUp10Activity"/>
         <activity android:name=".recipe_search_result_activity"/>
         <activity android:name=".recipe_screen_activity"/>
+
         <activity android:name=".CreatePostActivity" android:exported="false" android:theme="@style/Theme.IT_contest" />
 
 
