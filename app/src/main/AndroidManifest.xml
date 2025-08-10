@@ -37,6 +37,7 @@
         <activity android:name=".SignUp10Activity"/>
         <activity android:name=".recipe_search_result_activity"/>
         <activity android:name=".recipe_screen_activity"/>
+        <activity android:name=".CreatePostActivity" android:exported="false" android:theme="@style/Theme.IT_contest" />
 
 
     </application>
