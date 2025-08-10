@@ -27,7 +27,7 @@
         android:hardwareAccelerated="true"
         tools:targetApi="31" >
         <activity
-            android:name=".MapActivity"
+            android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,7 +55,7 @@
         <activity android:name=".PointMainActivity"/>
         <activity android:name=".PointRefundActivity"/>
         <activity android:name=".ImageUploadActivity"/>
-
+        <activity android:name=".MapActivity"/>
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="2299312293945670bc7f44edc58786ae" />
