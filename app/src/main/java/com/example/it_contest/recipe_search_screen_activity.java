@@ -110,10 +110,8 @@ public class recipe_search_screen_activity extends BaseActivity {
         });
 
         btnFabWrite.setOnClickListener(v -> {
-            Toast.makeText(this, "게시글 작성 화면으로 이동!", Toast.LENGTH_SHORT).show();
-            // 이동하려고 하는 페이지 (수아 언니 연결)
-            //Todo
-            // startActivity(new Intent(this, WriteActivity.class));
+            Intent intent = new Intent(this, CreatePostActivity.class);
+            startActivity(intent);
         });
 
         btnFabLocation.setOnClickListener(v -> {
