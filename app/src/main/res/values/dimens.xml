@@ -1,0 +1,5 @@
+<!-- res/values/dimens.xml -->
+<resources>
+    <dimen name="bot_icon_size">53dp</dimen>      <!-- 필요하면 여기서만 조정 -->
+    <dimen name="bot_icon_margin">2dp</dimen>
+</resources>

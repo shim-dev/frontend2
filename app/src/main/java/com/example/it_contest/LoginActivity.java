@@ -1,5 +1,8 @@
 package com.example.it_contest;
 
+
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,11 +53,10 @@ public class LoginActivity extends AppCompatActivity {
 
         // 로그인 버튼 클릭 이벤트
         btnLogin.setOnClickListener(v -> attemptLogin());
-
+      
         // 비밀번호 재설정 클릭 이벤트
         TextView findPw = findViewById(R.id.find_pw);
         findPw.setOnClickListener(v -> showEmailPopup());
-
     }
 
     private void attemptLogin() {

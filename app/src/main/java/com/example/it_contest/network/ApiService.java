@@ -1,5 +1,11 @@
 package com.example.it_contest.network;
 
+import com.example.it_contest.model.UserData;
+import com.google.gson.JsonObject;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
 import com.example.it_contest.model.Recipe;
 import com.example.it_contest.model.SearchHistory;
 import com.example.it_contest.model.UserData;
@@ -30,8 +36,6 @@ public interface ApiService {
 
     @POST("/login")
     Call<JsonObject> loginUser(@Body JsonObject body);
-
-
 
     // 챌린지 목록 불러오기 (filter: "all" 또는 "my")
     @GET("/api/challenges")

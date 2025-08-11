@@ -1,0 +1,6 @@
+<!-- res/drawable/chat_bubble_user.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#CCCCCC" /> <!-- ✅ 더 진한 회색 -->
+    <corners android:radius="20dp" />
+</shape>

@@ -14,7 +14,6 @@ public class UserData implements Serializable {
     public int sleepHours;
     public int caffeine;
     public int alcohol;
-
     public int point; // 포인트 추가! 기본값 0
 
     // 생성자 (선택)
