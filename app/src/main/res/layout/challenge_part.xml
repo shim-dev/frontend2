@@ -89,6 +89,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
+            android:id="@+id/challenge_image"
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:scaleType="centerCrop"
@@ -102,6 +103,7 @@
             android:layout_marginStart="12dp">
 
             <TextView
+                android:id="@+id/challenge_title_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="[운동 챌린지] 하루 5000보 걷기"
@@ -110,6 +112,7 @@
                 android:textColor="#000000" />
 
             <TextView
+                android:id="@+id/challenge_date_range"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="25.07.06~25.07.20"
@@ -182,6 +185,7 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/entry_fee2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="50P"
@@ -202,6 +206,7 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/my_points"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="700P"
@@ -230,6 +235,7 @@
                 android:textSize="20sp" />
 
             <TextView
+                android:id="@+id/points_after_payment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="650P"
@@ -239,6 +245,7 @@
 
         <!-- 도전 가능 여부 -->
         <TextView
+            android:id="@+id/challenge_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="도전 가능"

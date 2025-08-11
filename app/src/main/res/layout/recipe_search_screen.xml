@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAF6"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- 상단 뒤로가기 -->
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginTop="53dp"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 검색창 -->
+    <LinearLayout
+        android:id="@+id/layout_search"
+        android:layout_width="360dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:background="@drawable/search_background"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:hint="저속노화 레시피를 찾아보세요!"
+            android:background="@null"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/btn_clear"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_clear"
+            android:contentDescription="Clear Search"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/btn_search"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="Search" />
+    </LinearLayout>
+
+    <!-- 키워드 태그 -->
+    <HorizontalScrollView
+        android:id="@+id/hscroll_keywords"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/layout_search"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/layout_keywords"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:divider="@drawable/divider_space"
+                android:showDividers="middle" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- 최근 검색 헤더 -->
+    <LinearLayout
+        android:id="@+id/layout_recent_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hscroll_keywords">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="최근 검색"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_clear_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전체 삭제"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 최근 검색 리스트 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_recent_search"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layout_recent_header" />
+
+
+    <!-- FAB 하위 메뉴 - 글쓰기 -->
+    <LinearLayout
+        android:id="@+id/layout_fab_write"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:layout_marginBottom="240dp"
+    android:layout_marginEnd="40dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_black_rounded"
+        android:gravity="center"
+        android:paddingHorizontal="8dp"
+        android:layout_marginEnd="8dp"
+    android:text="게시글 작성하기"
+    android:textColor="#ffffff"
+    android:textSize="12sp" />
+
+    <ImageButton
+        android:id="@+id/btn_fab_write"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@null"
+        android:src="@drawable/ic_write"
+        android:contentDescription="글쓰기" />
+</LinearLayout>
+
+    <!-- FAB 하위 메뉴 - 위치 찾기 -->
+<LinearLayout
+android:id="@+id/layout_fab_location"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal"
+    android:gravity="center_vertical"
+android:visibility="gone"
+android:layout_marginBottom="180dp"
+    android:layout_marginEnd="40dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="40dp"
+android:background="@drawable/bg_black_rounded"
+android:gravity="center"
+android:paddingHorizontal="8dp"
+android:layout_marginEnd="8dp"
+    android:text="주변 저속노화 맛집 찾기"
+    android:textColor="#ffffff"
+    android:textSize="12sp" />
+
+<ImageButton
+android:id="@+id/btn_fab_location"
+android:layout_width="48dp"
+android:layout_height="48dp"
+android:background="@null"
+android:src="@drawable/ic_float_map"
+android:contentDescription="위치 찾기" />
+    </LinearLayout>
+
+
+    <!-- 메인 FAB -->
+    <ImageButton
+        android:id="@+id/btn_fab_main"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="100dp"
+        android:background="@null"
+        android:contentDescription="메인 FAB"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_float_logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@null" />
+
+
+    <!-- 하단 네비게이션 -->
+    <include
+        android:id="@+id/include_bottom_nav"
+        layout="@layout/bottom_navigation_main"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
