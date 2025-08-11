@@ -111,6 +111,11 @@ public class ChallengePartActivity extends BaseActivity {
                     myPoints = response.body().get("point").getAsInt();
                     myPointsView.setText(myPoints + " P");
 
+                    //  상단바 포인트도 같이 업데이트
+                    if (pointText != null) {
+                        pointText.setText(myPoints + " P");
+                    }
+
                     // challenge 정보 이미 로드됐으면 포인트 기반 UI 다시 업데이트
                     if (entryFee2 > 0) {
                         int pointsLeft = myPoints - entryFee2;
@@ -126,15 +131,22 @@ public class ChallengePartActivity extends BaseActivity {
                             confirmButton.setEnabled(false);
                         }
                     }
+                } else {
+                    // 실패 시 0P로 표시
+                    myPointsView.setText("0 P");
+                    if (pointText != null) pointText.setText("0 P");
                 }
             }
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
+                myPointsView.setText("0 P");
+                if (pointText != null) pointText.setText("0 P");
                 Toast.makeText(ChallengePartActivity.this, "포인트 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
 
     private void loadChallengeDetail(String challengeId) {
