@@ -205,21 +205,32 @@ public class ChallengeActivity extends BaseActivity {
         TextView pointsView = card.findViewById(R.id.points_text);
         TextView spotsView = card.findViewById(R.id.spots_text);
         TextView startView = card.findViewById(R.id.start_text);
+        TextView participantsBadge = card.findViewById(R.id.participants_text); // ★ 추가
 
         // 이미지
         String imageUrl = challenge.get("image_url").getAsString();
-        Glide.with(this).load(imageUrl).into(imageView);
+        Glide.with(this).load(imageUrl).centerCrop().into(imageView);
 
-        // 제목
+        // 제목/포인트
         titleView.setText(challenge.get("title").getAsString());
-
-        // 포인트
         pointsView.setText(challenge.get("points_reward").getAsInt() + " P");
 
-        // 선착순 남은 인원
+        // 현재 인원 (백엔드에서 participants=정수로 내려옴)
+        int current;
+        if (challenge.has("participants") && challenge.get("participants").isJsonPrimitive()) {
+            current = challenge.get("participants").getAsInt();
+        } else if (challenge.has("joined_users") && challenge.get("joined_users").isJsonArray()) {
+            // 혹시 participants 누락 시 백업 계산
+            current = challenge.get("joined_users").getAsJsonArray().size();
+        } else {
+            current = 0;
+        }
+        participantsBadge.setText(String.valueOf(current)); // ★ 배지에 표시
+
+        // 남은 인원
         int max = challenge.get("max_participants").getAsInt();
-        int current = challenge.get("participants").getAsInt();
-        spotsView.setText("선착순 " + (max - current) + "명 남음");
+        int remain = Math.max(0, max - current);
+        spotsView.setText("선착순 " + remain + "명 남음");
 
         // 시작 날짜
         startView.setText(challenge.get("start_date").getAsString() + " 시작");
