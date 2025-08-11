@@ -32,8 +32,6 @@ public class SignupActivity extends AppCompatActivity {
     private Button btnNext;
     private Spinner spinnerDomain;
 
-    private UserData userData = new UserData(); // ✅ UserData 객체 생성
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,21 +135,6 @@ public class SignupActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onClick(View v) {
-
-                // 입력값 추출
-                String emailInput = editEmail.getText().toString().trim();
-                String pwInput = editPw.getText().toString().trim();
-                String domain = (String) spinnerDomain.getSelectedItem();
-
-                // ✅ UserData 객체에 저장
-                userData.email = emailInput + "@" + domain;
-                userData.password = pwInput;
-
-                Intent intent = new Intent(SignupActivity.this, SignUp02Activity.class);
-                intent.putExtra("userData", userData);
-                startActivity(intent);
-                finish();
             public void onFailure(Call<JsonObject> call, Throwable t) {
                 editEmail.setError("서버 오류: 중복 검사 실패");
                 btnNext.setEnabled(false);
@@ -169,19 +152,6 @@ public class SignupActivity extends AppCompatActivity {
         boolean isPwValid = pw.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
         boolean isDomainSelected = selectedDomainIndex[0] != 0;
 
-        boolean isEmailValid = !email.isEmpty();
-        boolean isPwMatch = !pw.isEmpty() && pw.equals(pw2);
-        boolean isPwValid = pw.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
-        boolean isDomainSelected = selectedDomainIndex[0] != 0;
-
-        boolean enable = isEmailValid && isPwMatch && isPwValid && isDomainSelected;
-        btnNext.setEnabled(enable);
-
-        // 비밀번호가 잘못되었을 경우 사용자에게 알려줌
-        if (!pw.isEmpty() && !isPwValid) {
-            editPw.setError("비밀번호는 영문, 숫자, 특수문자 포함 8자 이상이어야 합니다.");
-        } else {
-            editPw.setError(null); // 에러 해제
         boolean enable = isEmailValid && isPwMatch && isPwValid && isDomainSelected && editEmail.getError() == null;
         btnNext.setEnabled(enable);
 
