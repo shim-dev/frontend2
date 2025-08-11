@@ -6,7 +6,5 @@
     <!-- 방법 B: 특정 도메인/IP만 허용 (권장) -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- EC2 쓰면 여기도 추가 -->
-        <!-- <domain includeSubdomains="true">ec2-xx-xx-xx-xx.ap-northeast-2.compute.amazonaws.com</domain> -->
     </domain-config>
 </network-security-config>

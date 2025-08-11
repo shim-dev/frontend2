@@ -32,7 +32,7 @@ public class recipe_search_screen_activity extends BaseActivity {
 
     private LinearLayout layoutKeywords;
     private EditText etSearch;
-    private ImageView btnSearch;
+    private ImageView btnSearch, btnClear;
 
     private RecyclerView rvRecent;
     private RecentSearchAdapter recentAdapter;
@@ -60,6 +60,7 @@ public class recipe_search_screen_activity extends BaseActivity {
         etSearch = findViewById(R.id.et_search);
         btnSearch = findViewById(R.id.btn_search);
         rvRecent = findViewById(R.id.rv_recent_search);
+        btnClear = findViewById(R.id.btn_clear);
 
         apiService = RetrofitClient.getApiService();
 
@@ -68,6 +69,8 @@ public class recipe_search_screen_activity extends BaseActivity {
 
         loadRecentSearchFromDB();
         loadKeywordsFromDB();
+
+        btnClear.setOnClickListener(v -> etSearch.setText(""));
 
         btnSearch.setOnClickListener(v -> {
             String keyword = etSearch.getText().toString().trim();

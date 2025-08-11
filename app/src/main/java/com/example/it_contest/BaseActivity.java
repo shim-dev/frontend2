@@ -63,16 +63,18 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
 
-//        menuChallenge.setOnClickListener(v -> {
-//            // challenge는 항상 ChallengeActivity로 이동하도록 (selected 체크 안 함)
-//            startActivity(new Intent(this, ChallengeActivity.class));
-//            overridePendingTransition(0, 0);
-//        });
+
+        menuChallenge.setOnClickListener(v -> {
+            // challenge는 항상 ChallengeActivity로 이동하도록 (selected 체크 안 함)
+            startActivity(new Intent(this, ChallengeActivity.class));
+            overridePendingTransition(0, 0);
+        });
 
         menuMy.setOnClickListener(v -> {
             if (!selected.equals("my")) {
-                // TODO: 마이페이지 Activity로 이동
-                // startActivity(new Intent(this, MyPageActivity.class));
+                // my는 항상 PointMainActivity 이동하도록 (selected 체크 안 함)
+                startActivity(new Intent(this, PointMainActivity.class));
+                overridePendingTransition(0, 0);
             }
         });
     }
@@ -88,4 +90,5 @@ public class BaseActivity extends AppCompatActivity {
         textChallenge.setVisibility(selected.equals("challenge") ? View.VISIBLE : View.GONE);
         textMy.setVisibility(selected.equals("my") ? View.VISIBLE : View.GONE);
     }
+
 }

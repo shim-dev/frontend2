@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="12dp">
+
+    <!-- 상단 행: 제목 + 포인트 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="챌린지 참여"
+            android:textSize="15sp"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/pointTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-50P"
+            android:textSize="14sp"
+            android:textColor="#3399FF"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 중간 행: 날짜 + 내용 -->
+    <TextView
+        android:id="@+id/dateDetailTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2025.07.01  하루 500보 걷기"
+        android:textColor="#99000000"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp" />
+
+    <!-- 하단 행: 적립/사용 설명 -->
+    <TextView
+        android:id="@+id/typeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="사용(700P)"
+        android:textColor="#99000000"
+        android:textSize="13sp"
+        android:layout_marginTop="2dp" />
+
+    <!-- 밑줄 Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="#11000000" />
+
+</LinearLayout>
