@@ -198,7 +198,7 @@ public class ChallengeActivity extends BaseActivity {
     }
 
 
-        /** 카드 하나에 데이터 채우기 */
+    /** 카드 하나에 데이터 채우기 */
     private void bindChallengeData(View card, JsonObject challenge) {
         ImageView imageView = card.findViewById(R.id.challenge_image);
         TextView titleView = card.findViewById(R.id.challenge_title);

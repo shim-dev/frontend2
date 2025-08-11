@@ -811,6 +811,3 @@ public class ChatActivity extends AppCompatActivity {
         return button;
     }
 }
-
-
-

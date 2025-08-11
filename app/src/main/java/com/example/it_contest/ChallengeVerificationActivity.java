@@ -1,3 +1,4 @@
+
 package com.example.it_contest;
 
 import android.content.Intent;
