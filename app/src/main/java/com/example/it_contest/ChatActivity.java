@@ -145,6 +145,14 @@ public class ChatActivity extends AppCompatActivity {
                 JSONObject responseJson = new JSONObject(response.toString());
                 JSONArray foods = responseJson.getJSONArray("foods");
 
+                double tempScore = -1;
+                if (responseJson.has("mind")) {
+                    JSONObject mind = responseJson.getJSONObject("mind");
+                    if (mind.has("meal_score")) {
+                        tempScore = mind.getDouble("meal_score");
+                    }
+                }
+                final double mealScoreFinal = tempScore;
                 runOnUiThread(() -> {
                     try {
                         StringBuilder result = new StringBuilder("추출된 음식: ");
@@ -153,19 +161,21 @@ public class ChatActivity extends AppCompatActivity {
                             if (i < foods.length() - 1) result.append(", ");
                         }
                         addBotMessage(result.toString());
+
+                        if (mealScoreFinal >= 0) {
+                            addMealScoreMessage(mealType, mealScoreFinal);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(this, "JSON 파싱 오류 발생", Toast.LENGTH_SHORT).show();
                     }
                 });
-
             } catch (Exception e) {
                 Log.e("sendToBackend", "요청 중 오류 발생", e); // 이거 추가!
                 runOnUiThread(() -> Toast.makeText(this, "서버 오류 발생", Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
-
 
     private void addWaterTracker() {
         View waterView = getLayoutInflater().inflate(R.layout.water_tracker, chatContainer, false);
@@ -498,6 +508,17 @@ public class ChatActivity extends AppCompatActivity {
                 JSONObject responseJson = new JSONObject(response.toString());
                 JSONArray foods = responseJson.getJSONArray("foods");
 
+                double tmpScore = -1;
+                if (responseJson.has("mind")) {
+                    JSONObject mind = responseJson.getJSONObject("mind");
+                    if (mind.has("meal_score")) {
+                        tmpScore = mind.getDouble("meal_score");
+                    }
+                }
+                final double mealScoreFinal = tmpScore;
+                final String selectedMealTypeFinal = selectedMealType;
+                final String imageUrlFinal = imageUrl;
+
                 runOnUiThread(() -> {
                     try {
                         StringBuilder foodListStr = new StringBuilder();
@@ -506,14 +527,19 @@ public class ChatActivity extends AppCompatActivity {
                             if (i < foods.length() - 1) foodListStr.append(", ");
                         }
 
-                        // 👉 Gemini 분석 결과 확인 메시지 출력
                         addBotMessage("먹으신 음식이 \"" + foodListStr + "\" 맞으신가요?");
-                        addConfirmationButtons(imageUrl); // ✔️ / ❌ 버튼
+
+                        // ✅ final 복사본 사용
+                        if (mealScoreFinal >= 0) {
+                            addMealScoreMessage(selectedMealTypeFinal, mealScoreFinal);
+                        }
+
+                        addConfirmationButtons(imageUrlFinal);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 });
-
             } catch (Exception e) {
                 Log.e("sendImageToChatMeal", "서버 오류", e);
                 runOnUiThread(() -> Toast.makeText(this, "서버 연결 실패", Toast.LENGTH_SHORT).show());
@@ -810,7 +836,10 @@ public class ChatActivity extends AppCompatActivity {
 
         return button;
     }
+
+    private void addMealScoreMessage(String mealType, double mealScore) {
+        String label = (mealType == null || mealType.isEmpty()) ? "이번" : mealType;
+        String msg = String.format("%s 식사의 식단 점수는 %.1f점입니다.", label, mealScore);
+        addBotMessage(msg);
+    }
 }
-
-
-
