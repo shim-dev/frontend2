@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -64,7 +65,8 @@ public class MapActivity extends AppCompatActivity {
 
     // 검색 UI
     private EditText etSearch;
-    private ImageView btnSearch, btnClear;
+    private ImageView btnClear,btnSearch;
+    private ImageButton backButton;
 
     // 기본 위치(서울 시청)
     private final LatLng defaultPos = LatLng.from(37.5665, 126.9780);
@@ -88,6 +90,9 @@ public class MapActivity extends AppCompatActivity {
         etSearch = findViewById(R.id.et_search);
         btnSearch = findViewById(R.id.btn_search);
         btnClear = findViewById(R.id.btn_clear);
+
+        backButton = findViewById(R.id.btn_back);
+        backButton.setOnClickListener(v -> finish());
 
         // 검색 버튼
         btnSearch.setOnClickListener(v -> {
