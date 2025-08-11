@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardUseCompatPadding="true"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="14dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground">
+
+        <!-- 썸네일 -->
+        <ImageView
+            android:id="@+id/ivThumb"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/thumb_rounded"
+            android:clipToOutline="true"
+            android:contentDescription="레시피 이미지"
+            android:layout_marginEnd="14dp"
+            android:src="@android:drawable/ic_menu_gallery"/>
+
+        <!-- 텍스트 블록 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- 제목 -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="두부면 팟타이"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#111111"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+
+            <!-- 태그 -->
+            <TextView
+                android:id="@+id/tvTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="#동남아요리   #두부면   #팟타이"
+                android:textSize="12sp"
+                android:textColor="#6B7280"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <!-- 설명(요약) -->
+            <TextView
+                android:id="@+id/tvDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="탄수화물 부담 없이 즐기는 저탄고단 태국식 볶음면"
+                android:textSize="13sp"
+                android:textColor="#374151"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+
+            <!-- 메타 정보 -->
+            <TextView
+                android:id="@+id/tvMeta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="⏱ 10분    🔥 난이도 하    👤 1인분"
+                android:textSize="12sp"
+                android:textColor="#4B5563"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+

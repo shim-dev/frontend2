@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F9F9F6"
+    tools:context=".RecipeListActivity">
+
+    <!-- 상단 컨텐츠 영역 -->
+    <LinearLayout
+        android:id="@+id/topContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/include_bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 검색창 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/search_background"
+            android:padding="8dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:hint="저속노화 레시피를 찾아보세요!"
+                android:background="@null"
+                android:singleLine="true"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:textColor="#000000"
+                android:textColorHint="#9AA0A6"/>
+
+            <ImageButton
+                android:id="@+id/clearSearchBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="검색어 지우기"
+                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+            <ImageButton
+                android:id="@+id/searchBtn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="검색 실행"
+                android:src="@android:drawable/ic_menu_search" />
+        </LinearLayout>
+
+        <!-- 정렬 탭 -->
+        <LinearLayout
+            android:id="@+id/sortBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:layout_marginBottom="8dp"
+            android:paddingHorizontal="4dp">
+
+            <Button
+                android:id="@+id/sortLatestBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="최신순"
+                android:background="@android:color/transparent"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:paddingHorizontal="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="|"
+                android:textColor="#D1D5DB"
+                android:paddingHorizontal="6dp"/>
+
+            <Button
+                android:id="@+id/sortPopularBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="조회순"
+                android:background="@android:color/transparent"
+                android:textColor="#999999"
+                android:textSize="14sp"
+                android:paddingHorizontal="8dp"/>
+        </LinearLayout>
+
+        <!-- 레시피 목록 (하단바에 가리지 않도록 paddingBottom 부여) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recipeRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="88dp"
+            tools:listitem="@layout/item_recipe_card" />
+        <!-- 하단바 높이만큼 여유 -->
+    </LinearLayout>
+
+    <!-- 로딩 인디케이터 (하단바 위에 표시) -->
+    <ProgressBar
+        android:id="@+id/loadingProgress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/include_bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- 하단 네비게이션 바 (고정) -->
+    <include
+        android:id="@+id/include_bottom_nav"
+        layout="@layout/bottom_navigation_main"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
