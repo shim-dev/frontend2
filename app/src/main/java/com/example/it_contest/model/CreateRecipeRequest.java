@@ -35,8 +35,6 @@ public class CreateRecipeRequest implements Serializable {
     @SerializedName("ingredients")
     private List<String> ingredients;
 
-
-    // ✅ 모든 10개 필드를 포함하는 새로운 생성자
     public CreateRecipeRequest(String name, String desc, List<String> keywords, String time, String level, String imageUrl, int serving, List<String> steps, List<String> ingredients) {
         this.name = name;
         this.desc = desc;
