@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
+import android.content.SharedPreferences;
+import android.content.Context;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -46,10 +48,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private TextInputLayout tilTime;
     private FlexboxLayout categoryContainer;
     private MaterialButtonToggleGroup difficultyGroup;
-    private TextView btnAddStep, btnAddIngredient, btnSubmit; // ✅ btnSubmit은 TextView이므로 타입 수정
+    private TextView btnAddStep, btnAddIngredient, btnSubmit;
     private ImageView imgPreview;
     private Uri selectedImageUri = null;
-    private ImageButton btnBack; // ✅ 클래스 멤버 변수 선언
+    private ImageButton btnBack;
 
     private LinearLayout stepsContainer, ingredientsContainer;
 
@@ -68,9 +70,7 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         initViews();
-        // ✅ 이제 btnBack이 초기화되었으므로 NullPointerException 없이 호출 가능
         btnBack.setOnClickListener(v -> finish());
-
         setupCategoryButtons();
         setupImagePicker();
         setupDynamicFields();
@@ -78,16 +78,14 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        // ✅ 클래스 멤버 변수에 직접 할당
         btnBack = findViewById(R.id.btnBack);
-
         etTitle = findViewById(R.id.etTitle);
         etContent = findViewById(R.id.etContent);
         etTime = findViewById(R.id.etTime);
         tilTime = findViewById(R.id.tilTime);
         etServing = findViewById(R.id.etServing);
         difficultyGroup = findViewById(R.id.difficultyGroup);
-        btnSubmit = findViewById(R.id.btnSubmit); // ✅ MaterialButton이 아닌 TextView
+        btnSubmit = findViewById(R.id.btnSubmit);
         imgPreview = findViewById(R.id.imgPreview);
 
         categoryContainer = findViewById(R.id.categoryContainer);
@@ -106,12 +104,9 @@ public class CreatePostActivity extends AppCompatActivity {
             button.setTag(cat);
             button.setTextSize(14);
 
-            // ✅ 배경 셀렉터를 적용하는 올바른 방법
             button.setBackgroundResource(R.drawable.button_selector);
-            // ✅ 글자색 셀렉터를 적용하는 올바른 방법
             button.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_bg_selector));
 
-            // LayoutParams 설정
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -159,41 +154,100 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void setupDifficulty() {
-        // difficultyGroup.check(R.id.btnDiffMid); // XML에서 기본값 설정하므로 필요 없음
+        difficultyGroup.check(R.id.btnDiffMid);
         difficultyGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            // 단일선택 모드 유지
         });
     }
 
     private void setupImagePicker() {
-        // findViewById(R.id.areaAddPhoto).setOnClickListener(v -> {
-        // imagePicker.launch("image/*");
-        // });
+        findViewById(R.id.areaAddPhoto).setOnClickListener(v -> {
+            imagePicker.launch("image/*");
+        });
     }
 
     private void setupSubmit() {
-        // btnSubmit.setOnClickListener(v -> {
-        // ...
-        // });
+        btnSubmit.setOnClickListener(v -> {
+            if (!validate()) return;
+
+            String name = etTitle.getText() != null ? etTitle.getText().toString().trim() : "";
+            String desc = etContent.getText() != null ? etContent.getText().toString().trim() : "";
+            String timeStr = etTime.getText().toString().trim();
+            List<String> keywords = getSelectedCategories();
+            String level = getSelectedDifficulty();
+            int serving = Integer.parseInt(etServing.getText().toString().trim());
+
+            List<String> steps = getDynamicInputValues(stepsContainer);
+            List<String> ingredients = getDynamicInputValues(ingredientsContainer);
+
+            if (selectedImageUri != null) {
+                uploadImageAndCreateRecipe(name, desc, timeStr, keywords, level, serving, steps, ingredients);
+            } else {
+                createRecipe(name, desc, timeStr, keywords, level, new ArrayList<>(), serving, steps, ingredients);
+            }
+        });
     }
 
     private void uploadImageAndCreateRecipe(String name, String desc, String time, List<String> keywords, String level, int serving, List<String> steps, List<String> ingredients) {
-        // btnSubmit.setEnabled(false);
-        // btnSubmit.setText("업로드 중...");
+        btnSubmit.setEnabled(false);
+        btnSubmit.setText("업로드 중...");
 
-        // ... (Firebase Storage 로직) ...
-        Toast.makeText(this, "서버 전송 로직 구현 필요", Toast.LENGTH_SHORT).show();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("recipe_images/" + UUID.randomUUID().toString());
+
+        storageRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        List<String> imageUrls = new ArrayList<>();
+                        imageUrls.add(uri.toString());
+                        createRecipe(name, desc, time, keywords, level, imageUrls, serving, steps, ingredients);
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(this, "이미지 URL 가져오기 실패", Toast.LENGTH_SHORT).show();
+                        resetSubmitButton();
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "이미지 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("CreatePostActivity", "Image upload failed", e);
+                    resetSubmitButton();
+                });
     }
 
     private void createRecipe(String name, String desc, String time, List<String> keywords, String level, List<String> imageUrls, int serving, List<String> steps, List<String> ingredients) {
-        // CreateRecipeRequest recipeRequest = new CreateRecipeRequest(name, desc, keywords, time, level, imageUrls, serving, steps, ingredients);
-        // ... (Retrofit 로직) ...
-        Toast.makeText(this, "서버 전송 로직 구현 필요", Toast.LENGTH_SHORT).show();
+        CreateRecipeRequest recipeRequest = new CreateRecipeRequest(name, desc, keywords, time, level, imageUrls, serving, steps, ingredients);
+
+        ApiService apiService = RetrofitClient.getApiService();
+        Call<JsonObject> call = apiService.createRecipe(recipeRequest);
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(CreatePostActivity.this, "레시피가 성공적으로 작성되었습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "알 수 없는 오류";
+                        Toast.makeText(CreatePostActivity.this, "레시피 작성 실패: " + errorBody, Toast.LENGTH_LONG).show();
+                        Log.e("CreatePostActivity", "Post creation failed: " + response.code() + " - " + errorBody);
+                    } catch (Exception e) {
+                        Toast.makeText(CreatePostActivity.this, "레시피 작성 실패: 오류 처리 중 예외 발생", Toast.LENGTH_LONG).show();
+                    }
+                    resetSubmitButton();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(CreatePostActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("CreatePostActivity", "Network error", t);
+                resetSubmitButton();
+            }
+        });
     }
 
     private void resetSubmitButton() {
         btnSubmit.setEnabled(true);
-        btnSubmit.setText("작성하기"); // ✅ 버튼 텍스트를 "작성하기"로 통일
+        btnSubmit.setText("작성하기");
     }
 
     private boolean validate() {
@@ -279,5 +333,10 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         }
         return values;
+    }
+
+    private String getLoggedInUserNickname() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        return prefs.getString("nickname", "shim"); // 닉네임이 없으면 'shim' 반환
     }
 }
