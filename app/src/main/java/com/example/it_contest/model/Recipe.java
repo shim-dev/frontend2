@@ -12,7 +12,7 @@ public class Recipe implements Serializable { // ✅ Serializable 추가
     //private String time;
     private String level;
     private int serving;
-    private String imageUrl;
+    private String imageUrl;  // ✅ String 타입 유지
     private String book;
     private List<String> steps;
     private List<Ingredient> ingredients;
@@ -53,8 +53,14 @@ public class Recipe implements Serializable { // ✅ Serializable 추가
     public int getServing() { return serving; }
     public void setServing(int serving) { this.serving = serving; }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    // ✅ 단일 문자열로 수정
+    public String getImageUrl() {
+        return imageUrl != null ? imageUrl : "";
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String getBook() { return book; }
     public void setBook(String book) { this.book = book; }

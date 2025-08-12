@@ -1,6 +1,7 @@
 package com.example.it_contest.network;
 
 import com.example.it_contest.model.UserData;
+import com.example.it_contest.model.CreateRecipeRequest;
 import com.google.gson.JsonObject;
 
 import retrofit2.Call;
@@ -93,9 +94,6 @@ public interface ApiService {
     Call<Map<String, Object>> getKeywords();
 
     @GET("/recipes/search")
-    Call<List<Recipe>> searchRecipes(@Query("keyword") String keyword);
-
-    @GET("/recipes/search")
     Call<List<Recipe>> searchRecipes(
             @Query("keyword") String keyword,
             @Query("sort") String sort
@@ -120,4 +118,6 @@ public interface ApiService {
     @DELETE("/search-history/clear")
     Call<Void> clearSearchHistory();
 
+    @POST("/posts/recipe")
+    Call<JsonObject> createRecipe(@Body CreateRecipeRequest request);
 }
