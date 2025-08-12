@@ -477,8 +477,7 @@ public class ChatActivity extends AppCompatActivity {
                 URL url = new URL("http://10.0.2.2:5000/chat-meal");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; utf-8");
-                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");conn.setDoOutput(true);
 
                 JSONObject jsonParam = new JSONObject();
                 jsonParam.put("nickname", "test_user");
