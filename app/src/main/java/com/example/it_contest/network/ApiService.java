@@ -94,9 +94,6 @@ public interface ApiService {
     Call<Map<String, Object>> getKeywords();
 
     @GET("/recipes/search")
-    Call<List<Recipe>> searchRecipes(@Query("keyword") String keyword);
-
-    @GET("/recipes/search")
     Call<List<Recipe>> searchRecipes(
             @Query("keyword") String keyword,
             @Query("sort") String sort

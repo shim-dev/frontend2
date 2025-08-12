@@ -23,8 +23,8 @@ public class CreateRecipeRequest implements Serializable {
     @SerializedName("level")
     private String level;
 
-    @SerializedName("imageUrls")
-    private List<String> imageUrls;
+    @SerializedName("imageUrl")
+    private String imageUrl;
 
     @SerializedName("serving")
     private int serving;
@@ -37,13 +37,13 @@ public class CreateRecipeRequest implements Serializable {
 
 
     // ✅ 모든 10개 필드를 포함하는 새로운 생성자
-    public CreateRecipeRequest(String name, String desc, List<String> keywords, String time, String level, List<String> imageUrls, int serving, List<String> steps, List<String> ingredients) {
+    public CreateRecipeRequest(String name, String desc, List<String> keywords, String time, String level, String imageUrl, int serving, List<String> steps, List<String> ingredients) {
         this.name = name;
         this.desc = desc;
         this.keywords = keywords;
         this.time = time;
         this.level = level;
-        this.imageUrls = imageUrls;
+        this.imageUrl = imageUrl;
         this.serving = serving;
         this.steps = steps;
         this.ingredients = ingredients;// ✅ 닉네임 초기화

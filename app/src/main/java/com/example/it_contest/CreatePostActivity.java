@@ -182,7 +182,7 @@ public class CreatePostActivity extends AppCompatActivity {
             if (selectedImageUri != null) {
                 uploadImageAndCreateRecipe(name, desc, timeStr, keywords, level, serving, steps, ingredients);
             } else {
-                createRecipe(name, desc, timeStr, keywords, level, new ArrayList<>(), serving, steps, ingredients);
+                createRecipe(name, desc, timeStr, keywords, level, "", serving, steps, ingredients); // ✅ 빈 문자열로 변경
             }
         });
     }
@@ -197,9 +197,8 @@ public class CreatePostActivity extends AppCompatActivity {
         storageRef.putFile(selectedImageUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        List<String> imageUrls = new ArrayList<>();
-                        imageUrls.add(uri.toString());
-                        createRecipe(name, desc, time, keywords, level, imageUrls, serving, steps, ingredients);
+                        String imageUrl = uri.toString(); // ✅ String으로 변경
+                        createRecipe(name, desc, time, keywords, level, imageUrl, serving, steps, ingredients);
                     }).addOnFailureListener(e -> {
                         Toast.makeText(this, "이미지 URL 가져오기 실패", Toast.LENGTH_SHORT).show();
                         resetSubmitButton();
@@ -212,8 +211,9 @@ public class CreatePostActivity extends AppCompatActivity {
                 });
     }
 
-    private void createRecipe(String name, String desc, String time, List<String> keywords, String level, List<String> imageUrls, int serving, List<String> steps, List<String> ingredients) {
-        CreateRecipeRequest recipeRequest = new CreateRecipeRequest(name, desc, keywords, time, level, imageUrls, serving, steps, ingredients);
+    // ✅ 메서드 시그니처 변경: List<String> imageUrl → String imageUrl
+    private void createRecipe(String name, String desc, String time, List<String> keywords, String level, String imageUrl, int serving, List<String> steps, List<String> ingredients) {
+        CreateRecipeRequest recipeRequest = new CreateRecipeRequest(name, desc, keywords, time, level, imageUrl, serving, steps, ingredients);
 
         ApiService apiService = RetrofitClient.getApiService();
         Call<JsonObject> call = apiService.createRecipe(recipeRequest);
@@ -293,7 +293,6 @@ public class CreatePostActivity extends AppCompatActivity {
             ok = false;
         }
 
-
         if (difficultyGroup.getCheckedButtonId() == -1) {
             Toast.makeText(this, "난이도를 선택해 주세요", Toast.LENGTH_SHORT).show();
             ok = false;
@@ -315,9 +314,9 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private String getSelectedDifficulty() {
         int id = difficultyGroup.getCheckedButtonId();
-        if (id == R.id.btnDiffLow) return "LOW";
-        if (id == R.id.btnDiffMid) return "MID";
-        if (id == R.id.btnDiffHigh) return "HIGH";
+        if (id == R.id.btnDiffLow) return "하";
+        if (id == R.id.btnDiffMid) return "중";
+        if (id == R.id.btnDiffHigh) return "상";
         return "";
     }
 
