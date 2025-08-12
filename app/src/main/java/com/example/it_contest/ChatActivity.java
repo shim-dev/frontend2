@@ -44,6 +44,8 @@ import java.io.IOException;
 import android.os.Environment;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import android.content.SharedPreferences;
+import android.content.Context;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -111,7 +113,7 @@ public class ChatActivity extends AppCompatActivity {
                 conn.setDoOutput(true);
 
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("nickname", "test_user");
+                jsonParam.put("nickname", getLoggedInUserNickname());
                 jsonParam.put("message", message);
                 jsonParam.put("meal_type", mealType);
 
@@ -123,36 +125,52 @@ public class ChatActivity extends AppCompatActivity {
                 Log.e("sendToBackend", "서버 응답 코드: " + responseCode);
 
                 if (responseCode != HttpURLConnection.HTTP_OK) {
-                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"));
-                    StringBuilder errorResponse = new StringBuilder();
-                    String errorLine;
-                    while ((errorLine = errorReader.readLine()) != null) {
-                        errorResponse.append(errorLine.trim());
+                    // ... 오류 처리 로직은 동일 ...
+                    try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "utf-8"))) {
+                        StringBuilder errorResponse = new StringBuilder();
+                        String errorLine;
+                        while ((errorLine = errorReader.readLine()) != null) {
+                            errorResponse.append(errorLine.trim());
+                        }
+                        Log.e("sendToBackend", "서버 에러 응답: " + errorResponse.toString());
                     }
-                    Log.e("sendToBackend", "서버 에러 응답: " + errorResponse.toString());
-
                     runOnUiThread(() -> Toast.makeText(this, "서버 응답 오류: " + responseCode, Toast.LENGTH_SHORT).show());
                     return;
                 }
-                InputStream is = conn.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+
                 StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    response.append(line.trim());
+                // ✅ try-with-resources로 자원 누수 방지
+                try (InputStream is = conn.getInputStream();
+                     BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        response.append(line.trim());
+                    }
                 }
 
                 JSONObject responseJson = new JSONObject(response.toString());
                 JSONArray foods = responseJson.getJSONArray("foods");
 
                 double tempScore = -1;
+                String notes = "";
+                String recommendation = "";
                 if (responseJson.has("mind")) {
                     JSONObject mind = responseJson.getJSONObject("mind");
                     if (mind.has("meal_score")) {
                         tempScore = mind.getDouble("meal_score");
                     }
+                    // ✅ 'notes'를 파싱하는 로직 추가
+                    if (mind.has("notes")) {
+                        notes = mind.getString("notes");
+                    }
+                    if (mind.has("recommendation")) {
+                        recommendation = mind.getString("recommendation");
+                    }
                 }
                 final double mealScoreFinal = tempScore;
+                final String finalNotes = notes;
+                final String finalRecommendation = recommendation;
+
                 runOnUiThread(() -> {
                     try {
                         StringBuilder result = new StringBuilder("추출된 음식: ");
@@ -162,16 +180,23 @@ public class ChatActivity extends AppCompatActivity {
                         }
                         addBotMessage(result.toString());
 
+                        // ✅ 점수와 노트를 한 번에 보여주기
                         if (mealScoreFinal >= 0) {
-                            addMealScoreMessage(mealType, mealScoreFinal);
+                            addMealScoreMessage(mealType, mealScoreFinal, finalNotes);
                         }
+                        // ✅ 추천 보여주기 (다음 식사에 대한 팁)
+                        if (!finalRecommendation.isEmpty()) {
+                            addBotMessage("💡 " + finalRecommendation);
+                        }
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(this, "JSON 파싱 오류 발생", Toast.LENGTH_SHORT).show();
                     }
                 });
+
             } catch (Exception e) {
-                Log.e("sendToBackend", "요청 중 오류 발생", e); // 이거 추가!
+                Log.e("sendToBackend", "요청 중 오류 발생", e);
                 runOnUiThread(() -> Toast.makeText(this, "서버 오류 발생", Toast.LENGTH_SHORT).show());
             }
         }).start();
@@ -471,13 +496,15 @@ public class ChatActivity extends AppCompatActivity {
                     Toast.makeText(this, "Firebase 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
     private void sendImageToChatMeal(String imageUrl) {
         new Thread(() -> {
             try {
                 URL url = new URL("http://10.0.2.2:5000/chat-meal");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; utf-8");conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setDoOutput(true);
 
                 JSONObject jsonParam = new JSONObject();
                 jsonParam.put("nickname", "test_user");
@@ -492,31 +519,41 @@ public class ChatActivity extends AppCompatActivity {
 
                 int responseCode = conn.getResponseCode();
                 if (responseCode != HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> Toast.makeText(this, "서버 응답 오류", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(this, "서버 응답 오류: " + responseCode, Toast.LENGTH_SHORT).show());
                     return;
                 }
 
-                InputStream is = conn.getInputStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
                 StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    response.append(line.trim());
+                try (InputStream is = conn.getInputStream();
+                     BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        response.append(line.trim());
+                    }
                 }
 
                 JSONObject responseJson = new JSONObject(response.toString());
                 JSONArray foods = responseJson.getJSONArray("foods");
 
-                double tmpScore = -1;
+                double mealScore = -1;
+                String notes = "";
+                String recommendation = "";
                 if (responseJson.has("mind")) {
                     JSONObject mind = responseJson.getJSONObject("mind");
                     if (mind.has("meal_score")) {
-                        tmpScore = mind.getDouble("meal_score");
+                        mealScore = mind.getDouble("meal_score");
+                    }
+                    if (mind.has("notes")) {
+                        notes = mind.getString("notes");
+                    }
+                    if (mind.has("recommendation")) {
+                        recommendation = mind.getString("recommendation");
                     }
                 }
-                final double mealScoreFinal = tmpScore;
+                final double finalMealScore = mealScore;
                 final String selectedMealTypeFinal = selectedMealType;
-                final String imageUrlFinal = imageUrl;
+                final String finalNotes = notes;
+                final String finalRecommendation = recommendation;
 
                 runOnUiThread(() -> {
                     try {
@@ -526,14 +563,21 @@ public class ChatActivity extends AppCompatActivity {
                             if (i < foods.length() - 1) foodListStr.append(", ");
                         }
 
+                        // 1. Gemini가 추출한 음식 목록 보여주기
                         addBotMessage("먹으신 음식이 \"" + foodListStr + "\" 맞으신가요?");
 
-                        // ✅ final 복사본 사용
-                        if (mealScoreFinal >= 0) {
-                            addMealScoreMessage(selectedMealTypeFinal, mealScoreFinal);
+                        // 2. 점수와 노트를 한 번에 보여주기
+                        if (finalMealScore >= 0) {
+                            addMealScoreMessage(selectedMealTypeFinal, finalMealScore, finalNotes);
                         }
 
-                        addConfirmationButtons(imageUrlFinal);
+                        // 3. 추천 메시지 보여주기
+                        if (!finalRecommendation.isEmpty()) {
+                            addBotMessage("💡 " + finalRecommendation);
+                        }
+
+                        // 4. 사용자에게 최종 기록 여부 확인
+                        addConfirmationButtons(imageUrl, foodListStr.toString(), finalMealScore, finalNotes, finalRecommendation, selectedMealTypeFinal);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -545,7 +589,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         }).start();
     }
-    private void addConfirmationButtons(String imageUrl) {
+
+    private void addConfirmationButtons(String imageUrl, String foodList, double mealScore, String notes, String recommendation, String mealType) {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         layout.setGravity(Gravity.START);
@@ -555,16 +600,18 @@ public class ChatActivity extends AppCompatActivity {
         buttonYes.setText("✅ 맞아요");
         buttonYes.setOnClickListener(v -> {
             addAnswerBubble("✅ 맞아요");
-            addBotMessage("식단 기록이 완료되었습니다!");
-            // 🔥 이미 기록은 서버에서 됐으므로 별도 처리 X
+            sendFinalRecordToBackend(imageUrl, foodList, mealScore, notes, recommendation, mealType);
         });
 
         AppCompatButton buttonNo = new AppCompatButton(this);
         buttonNo.setText("❌ 아니에요");
         buttonNo.setOnClickListener(v -> {
             addAnswerBubble("❌ 아니에요");
-            addBotMessage("다시 입력해 주세요.");
-            addMealOptions();
+            // '다시 입력해 주세요' 메시지를 먼저 보여줍니다.
+            addBotMessage("다시 시도해주세요. 📷");
+
+            // 이미지 선택 대화 상자를 다시 띄웁니다.
+            showImagePickerDialog();
         });
 
         layout.addView(buttonYes);
@@ -572,6 +619,13 @@ public class ChatActivity extends AppCompatActivity {
         chatContainer.addView(layout);
         scrollToBottom();
     }
+
+    private void sendFinalRecordToBackend(String imageUrl, String foodList, double mealScore, String notes, String recommendation, String mealType) {
+        // 여기에 최종 기록을 위한 API 호출 로직을 구현해야 합니다.
+        // 이 메서드는 서버의 `/chat-meal` 엔드포인트와는 다른 새로운 엔드포인트를 호출해야 합니다.
+        addBotMessage("식단 기록이 완료되었습니다!");
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -613,6 +667,7 @@ public class ChatActivity extends AppCompatActivity {
 
         return button;
     }
+
     private void addAnswerBubble(String text) {
         // wrapper (말풍선 정렬용)
         LinearLayout wrapper = new LinearLayout(this);
@@ -684,6 +739,7 @@ public class ChatActivity extends AppCompatActivity {
 
         return layout;
     }
+
     private ImageView createBotImage() {
         ImageView image = new ImageView(this);
         int size = getResources().getDimensionPixelSize(R.dimen.bot_icon_size);
@@ -694,6 +750,7 @@ public class ChatActivity extends AppCompatActivity {
         image.setScaleType(ImageView.ScaleType.CENTER_CROP); // 스타일과 동일
         return image;
     }
+
     private TextView createBotText(String msg) {
         TextView text = new TextView(this);
         text.setText(msg);
@@ -836,9 +893,19 @@ public class ChatActivity extends AppCompatActivity {
         return button;
     }
 
-    private void addMealScoreMessage(String mealType, double mealScore) {
+    private void addMealScoreMessage(String mealType, double mealScore, String notes) {
         String label = (mealType == null || mealType.isEmpty()) ? "이번" : mealType;
         String msg = String.format("%s 식사의 식단 점수는 %.1f점입니다.", label, mealScore);
+
+        if (notes != null && !notes.isEmpty()) {
+            msg += "\n\n" + notes;
+        }
         addBotMessage(msg);
     }
+
+    private String getLoggedInUserNickname() {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        return prefs.getString("nickname", "test_user"); // 기본값 'test_user'
+    }
+
 }
