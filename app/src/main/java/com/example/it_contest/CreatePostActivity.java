@@ -4,33 +4,52 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import com.example.it_contest.model.CreateRecipeRequest;
+import com.example.it_contest.network.ApiService;
+import com.example.it_contest.network.RetrofitClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.flexbox.FlexboxLayout.LayoutParams;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-    private TextInputEditText etTitle, etContent, etTime;
+    private TextInputEditText etTitle, etContent, etTime, etServing; // ✅ etServing 추가
     private TextInputLayout tilTime;
-    private ChipGroup chipGroupCategory;
+    private FlexboxLayout categoryContainer;
     private MaterialButtonToggleGroup difficultyGroup;
-    private MaterialButton btnSubmit;
+    private TextView btnAddStep, btnAddIngredient, btnSubmit;
     private ImageView imgPreview;
     private Uri selectedImageUri = null;
+
+    private LinearLayout stepsContainer, ingredientsContainer;
 
     private final ActivityResultLauncher<String> imagePicker =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
@@ -47,44 +66,97 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         initViews();
-        setupCategoryChips();
+        setupCategoryButtons(); // ✅ 카테고리 버튼 설정 메서드 호출
         setupDifficulty();
         setupImagePicker();
+        setupDynamicFields();
         setupSubmit();
     }
-
     private void initViews() {
         etTitle = findViewById(R.id.etTitle);
         etContent = findViewById(R.id.etContent);
         etTime = findViewById(R.id.etTime);
         tilTime = findViewById(R.id.tilTime);
-        chipGroupCategory = findViewById(R.id.chipGroupCategory);
+        etServing = findViewById(R.id.etServing);
         difficultyGroup = findViewById(R.id.difficultyGroup);
         btnSubmit = findViewById(R.id.btnSubmit);
         imgPreview = findViewById(R.id.imgPreview);
+
+        categoryContainer = findViewById(R.id.categoryContainer);
+        stepsContainer = findViewById(R.id.stepsContainer);
+        ingredientsContainer = findViewById(R.id.ingredientsContainer);
+
+        btnAddStep = findViewById(R.id.btnAddStep);
+        btnAddIngredient = findViewById(R.id.btnAddIngredient);
     }
 
-    private void setupCategoryChips() {
-        // 다중 선택 가능
-        chipGroupCategory.setSingleSelection(false);
-        // XML에 이미 Chip이 정의돼 있어도 동작함. (추가로 동적 생성 시 아래 예시)
-        // addChip("#태국", false);
+    private void setupCategoryButtons() {
+        String[] categories = {"한식", "양식", "중식", "일식", "동남아시아", "퓨전", "채식"};
+        for (String cat : categories) {
+            Button button = new Button(this);
+            button.setText("#" + cat);
+            button.setTag(cat);
+            button.setTextSize(14);
+
+            // ✅ 배경 셀렉터를 적용하는 올바른 방법
+            button.setBackgroundResource(R.drawable.button_selector);
+            // ✅ 글자색 셀렉터를 적용하는 올바른 방법
+            button.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_bg_selector));
+
+            // LayoutParams 설정
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 0, 8, 8);
+            button.setLayoutParams(params);
+
+            button.setOnClickListener(v -> {
+                // ✅ setSelected()만 호출해도 셀렉터에 의해 색상이 자동으로 변경됩니다.
+                v.setSelected(!v.isSelected());
+            });
+            categoryContainer.addView(button);
+        }
     }
 
-    private void addChip(String text, boolean isChecked) {
-        Chip chip = new Chip(this);
-        chip.setText(text);
-        chip.setCheckable(true);
-        chip.setChecked(isChecked);
-        chip.setChipBackgroundColorResource(R.color.chip_bg_selector);
-        chipGroupCategory.addView(chip);
+
+    private void setupDynamicFields() {
+        btnAddStep.setOnClickListener(v -> addDynamicInputField(stepsContainer, "레시피 단계", "단계 추가"));
+        btnAddIngredient.setOnClickListener(v -> addDynamicInputField(ingredientsContainer, "재료", "재료 추가"));
+    }
+
+    private void addDynamicInputField(LinearLayout container, String hintText, String buttonText) {
+        // 동적으로 생성할 레이아웃
+        LinearLayout rowLayout = new LinearLayout(this);
+        rowLayout.setOrientation(LinearLayout.HORIZONTAL);
+        rowLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        rowLayout.setPadding(0, 8, 0, 8); // 간격 추가
+
+        TextInputLayout textInputLayout = new TextInputLayout(this);
+        textInputLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        textInputLayout.setHint(hintText);
+
+        TextInputEditText editText = new TextInputEditText(textInputLayout.getContext());
+        textInputLayout.addView(editText);
+
+        ImageView removeButton = new ImageView(this);
+        removeButton.setImageResource(R.drawable.ic_delete);
+        removeButton.setPadding(16, 16, 16, 16);
+        removeButton.setOnClickListener(v -> container.removeView(rowLayout));
+
+        rowLayout.addView(textInputLayout);
+        rowLayout.addView(removeButton);
+
+        container.addView(rowLayout);
     }
 
     private void setupDifficulty() {
-        // 기본값: 중
         difficultyGroup.check(R.id.btnDiffMid);
         difficultyGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            // 단일선택 모드 유지 (XML에서 singleSelection=true)
+            // 단일선택 모드 유지
         });
     }
 
@@ -98,18 +170,85 @@ public class CreatePostActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(v -> {
             if (!validate()) return;
 
-            String title = etTitle.getText() != null ? etTitle.getText().toString().trim() : "";
-            String content = etContent.getText() != null ? etContent.getText().toString().trim() : "";
-            int minutes = Integer.parseInt(etTime.getText().toString().trim());
-            List<String> categories = getSelectedCategories();
-            String difficulty = getSelectedDifficulty();
+            String name = etTitle.getText() != null ? etTitle.getText().toString().trim() : "";
+            String desc = etContent.getText() != null ? etContent.getText().toString().trim() : "";
+            String timeStr = etTime.getText().toString().trim();
+            List<String> keywords = getSelectedCategories();
+            String level = getSelectedDifficulty();
+            int serving = Integer.parseInt(etServing.getText().toString().trim());
 
-            // TODO: 여기서 서버 전송(Volley/Retrofit) 로직 연결
-            // 예) CreatePostRequest req = new CreatePostRequest(title, content, categories, minutes, difficulty, selectedImageUri);
+            List<String> steps = getDynamicInputValues(stepsContainer);
+            List<String> ingredients = getDynamicInputValues(ingredientsContainer);
 
-            Toast.makeText(this, "작성 완료 (로컬 검증 통과)", Toast.LENGTH_SHORT).show();
-            finish();
+            if (selectedImageUri != null) {
+                uploadImageAndCreateRecipe(name, desc, timeStr, keywords, level, serving, steps, ingredients);
+            } else {
+                createRecipe(name, desc, timeStr, keywords, level, new ArrayList<>(), serving, steps, ingredients);
+            }
         });
+    }
+
+    private void uploadImageAndCreateRecipe(String name, String desc, String time, List<String> keywords, String level, int serving, List<String> steps, List<String> ingredients) {
+        btnSubmit.setEnabled(false);
+        btnSubmit.setText("업로드 중...");
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("recipe_images/" + UUID.randomUUID().toString());
+
+        storageRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        List<String> imageUrls = new ArrayList<>();
+                        imageUrls.add(uri.toString());
+                        createRecipe(name, desc, time, keywords, level, imageUrls, serving, steps, ingredients);
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(this, "이미지 URL 가져오기 실패", Toast.LENGTH_SHORT).show();
+                        resetSubmitButton();
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "이미지 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("CreatePostActivity", "Image upload failed", e);
+                    resetSubmitButton();
+                });
+    }
+
+    private void createRecipe(String name, String desc, String time, List<String> keywords, String level, List<String> imageUrls, int serving, List<String> steps, List<String> ingredients) {
+        CreateRecipeRequest recipeRequest = new CreateRecipeRequest(name, desc, keywords, time, level, imageUrls, serving, steps, ingredients);
+
+        ApiService apiService = RetrofitClient.getApiService();
+        Call<JsonObject> call = apiService.createRecipe(recipeRequest);
+
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(CreatePostActivity.this, "레시피가 성공적으로 작성되었습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "알 수 없는 오류";
+                        Toast.makeText(CreatePostActivity.this, "레시피 작성 실패: " + errorBody, Toast.LENGTH_LONG).show();
+                        Log.e("CreatePostActivity", "Post creation failed: " + response.code() + " - " + errorBody);
+                    } catch (Exception e) {
+                        Toast.makeText(CreatePostActivity.this, "레시피 작성 실패: 오류 처리 중 예외 발생", Toast.LENGTH_LONG).show();
+                    }
+                    resetSubmitButton();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(CreatePostActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("CreatePostActivity", "Network error", t);
+                resetSubmitButton();
+            }
+        });
+    }
+
+    private void resetSubmitButton() {
+        btnSubmit.setEnabled(true);
+        btnSubmit.setText("작성 완료");
     }
 
     private boolean validate() {
@@ -146,6 +285,16 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         }
 
+        if (getDynamicInputValues(ingredientsContainer).isEmpty()) {
+            Toast.makeText(this, "재료를 하나 이상 입력해 주세요", Toast.LENGTH_SHORT).show();
+            ok = false;
+        }
+        if (getDynamicInputValues(stepsContainer).isEmpty()) {
+            Toast.makeText(this, "조리 순서를 하나 이상 입력해 주세요", Toast.LENGTH_SHORT).show();
+            ok = false;
+        }
+
+
         if (difficultyGroup.getCheckedButtonId() == -1) {
             Toast.makeText(this, "난이도를 선택해 주세요", Toast.LENGTH_SHORT).show();
             ok = false;
@@ -156,18 +305,35 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private List<String> getSelectedCategories() {
         List<String> list = new ArrayList<>();
-        for (int i = 0; i < chipGroupCategory.getChildCount(); i++) {
-            Chip c = (Chip) chipGroupCategory.getChildAt(i);
-            if (c.isChecked()) list.add(c.getText().toString().replace("#", ""));
+        // ✅ Button을 사용하도록 로직 변경
+        for (int i = 0; i < categoryContainer.getChildCount(); i++) {
+            View child = categoryContainer.getChildAt(i);
+            if (child instanceof Button && child.isSelected()) {
+                list.add(((Button) child).getTag().toString());
+            }
         }
         return list;
     }
 
     private String getSelectedDifficulty() {
         int id = difficultyGroup.getCheckedButtonId();
-        if (id == R.id.btnDiffLow) return "하";
-        if (id == R.id.btnDiffMid) return "중";
-        if (id == R.id.btnDiffHigh) return "상";
+        if (id == R.id.btnDiffLow) return "LOW";
+        if (id == R.id.btnDiffMid) return "MID";
+        if (id == R.id.btnDiffHigh) return "HIGH";
         return "";
+    }
+
+    private List<String> getDynamicInputValues(LinearLayout container) {
+        List<String> values = new ArrayList<>();
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View child = container.getChildAt(i);
+            if (child instanceof LinearLayout) {
+                TextInputLayout til = (TextInputLayout) ((LinearLayout) child).getChildAt(0);
+                if (til.getEditText() != null && !TextUtils.isEmpty(til.getEditText().getText())) {
+                    values.add(til.getEditText().getText().toString().trim());
+                }
+            }
+        }
+        return values;
     }
 }
