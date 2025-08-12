@@ -181,5 +181,4 @@ public class PointChargeActivity extends BaseActivity {
                     }
                 }).requestPayment();
     }
-    }
-
+}

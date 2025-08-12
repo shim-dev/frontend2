@@ -24,36 +24,36 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PointHistoryActivity extends BaseActivity
- {
+{
     private List<PointHistoryItem> fullItemList;
     private RecyclerView recyclerView;
     private PointHistoryAdapter adapter;
-     private TextView availablePointTextView, earnedPointTextView, usedPointTextView;
+    private TextView availablePointTextView, earnedPointTextView, usedPointTextView;
 
 
 
-     @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.point_history);
 
         ApiService apiService = RetrofitClient.getApiService();
-         // SharedPreferences에서 nickname 가져오기
-         SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-         String nickname = prefs.getString("nickname", null);
+        // SharedPreferences에서 nickname 가져오기
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String nickname = prefs.getString("nickname", null);
 
-         if (nickname == null) {
-             Log.e("HISTORY", "로그인 정보 없음");
-             Intent intent = new Intent(PointHistoryActivity.this, LoginActivity.class);
-             startActivity(intent);
-             finish();
-             return;
-         }
+        if (nickname == null) {
+            Log.e("HISTORY", "로그인 정보 없음");
+            Intent intent = new Intent(PointHistoryActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
-         Call<JsonArray> call = apiService.getPointHistory(nickname);  //
+        Call<JsonArray> call = apiService.getPointHistory(nickname);  //
 
 
-         call.enqueue(new Callback<JsonArray>() {
+        call.enqueue(new Callback<JsonArray>() {
             @Override
             public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -104,9 +104,9 @@ public class PointHistoryActivity extends BaseActivity
             }
         });
 
-         availablePointTextView = findViewById(R.id.available_point);
-         earnedPointTextView = findViewById(R.id.earned_point);
-         usedPointTextView = findViewById(R.id.used_point);
+        availablePointTextView = findViewById(R.id.available_point);
+        earnedPointTextView = findViewById(R.id.earned_point);
+        usedPointTextView = findViewById(R.id.used_point);
 
 
         // 하단바 세팅
