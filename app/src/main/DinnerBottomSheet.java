@@ -1,0 +1,416 @@
+// 파일명: DinnerBottomSheet.java
+package com.example.it_contest;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+
+import com.example.it_contest.network.ApiService;
+import com.example.it_contest.network.ChatMealResponse;
+import com.example.it_contest.network.DietRecord;
+import com.example.it_contest.network.FoodSearchResult;
+import com.example.it_contest.network.RetrofitClient;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.gson.JsonObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class DinnerBottomSheet extends BottomSheetDialogFragment {
+
+    public static final String RESULT_KEY_SAVED   = "bb_saved";
+    public static final String RESULT_KEY_DELETED = "bb_deleted";
+
+    private EditText    foodInput;
+    private TextView    emptyStateText;
+    private LinearLayout selectedListContainer;
+    private TextView    dateText;
+
+    private String nickname;
+    private String mealType = "저녁";
+    private String date;
+
+    private ActivityResultLauncher<Intent> searchResultLauncher;
+    private ActivityResultLauncher<String> cameraPermissionLauncher;
+    private ActivityResultLauncher<Uri>     takePictureLauncher;
+    private ActivityResultLauncher<String>  pickImageLauncher;
+    private Uri tempPhotoUri;
+
+    public static DinnerBottomSheet newInstance(String date, String nickname, String mealType) {
+        DinnerBottomSheet f = new DinnerBottomSheet();
+        Bundle b = new Bundle();
+        b.putString("date", date);
+        b.putString("nickname", nickname);
+        b.putString("meal_type", mealType);
+        f.setArguments(b);
+        return f;
+    }
+
+    @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> { if (uri != null) analyzeImageAndShowResults(uri); });
+
+        takePictureLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                ok -> { if (ok && tempPhotoUri != null) analyzeImageAndShowResults(tempPhotoUri); });
+
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> { if (granted) launchCamera();
+                else Toast.makeText(getContext(), "카메라 권한이 필요합니다.", Toast.LENGTH_SHORT).show(); });
+    }
+
+    @Nullable
+    @Override public View onCreateView(@NonNull LayoutInflater inflater,
+                                       @Nullable ViewGroup container,
+                                       @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.dinner_bottom_sheet, container, false);
+
+        foodInput             = view.findViewById(R.id.foodInput);
+        emptyStateText        = view.findViewById(R.id.emptyStateText);
+        selectedListContainer = view.findViewById(R.id.selectedListContainer);
+        dateText              = view.findViewById(R.id.dateText);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            date     = args.getString("date");
+            nickname = args.getString("nickname");
+            mealType = args.getString("meal_type", "저녁");
+        }
+
+        if (!TextUtils.isEmpty(date) && date.length() >= 10) {
+            String mm = date.substring(5, 7);
+            String dd = date.substring(8, 10);
+            dateText.setText(String.format(Locale.getDefault(), "%s\n%s", mm, dd));
+        }
+
+        searchResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        FoodSearchResult selectedFood =
+                                result.getData().getParcelableExtra("selected_food");
+                        if (selectedFood != null) addMealOnServer(selectedFood);
+                    }
+                });
+
+        view.findViewById(R.id.searchButton).setOnClickListener(v -> {
+            String query = foodInput.getText().toString().trim();
+            if (TextUtils.isEmpty(query)) {
+                Toast.makeText(getContext(), "음식 이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            searchFoodOnServer(query);
+        });
+
+        view.findViewById(R.id.cameraButton).setOnClickListener(v -> showImagePickDialog());
+
+        return view;
+    }
+
+    @Override public void onStart() {
+        super.onStart();
+        fetchAndRenderAll();
+    }
+
+    private void searchFoodOnServer(String query) {
+        ApiService api = RetrofitClient.getApiService();
+        java.util.Map<String, String> body = new java.util.HashMap<>();
+        body.put("query", query);
+        api.searchFood(body).enqueue(new Callback<List<FoodSearchResult>>() {
+            @Override public void onResponse(Call<List<FoodSearchResult>> call, Response<List<FoodSearchResult>> res) {
+                if (res.isSuccessful() && res.body() != null) {
+                    Intent intent = new Intent(getActivity(), SearchResultMain.class);
+                    intent.putExtra("query", query);
+                    intent.putParcelableArrayListExtra("food_results", new ArrayList<>(res.body()));
+                    searchResultLauncher.launch(intent);
+                } else {
+                    Toast.makeText(getContext(), "검색 실패: " + res.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<List<FoodSearchResult>> call, Throwable t) {
+                Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void addMealOnServer(FoodSearchResult food) {
+        addMealOnServer(food.getName(), food.getScore(), food.getNote());
+    }
+
+
+
+    private void addMealOnServer(String name, int score, String note) {
+        ApiService api = RetrofitClient.getApiService();
+
+        JsonObject body = new JsonObject();
+        body.addProperty("nickname", nickname);
+        body.addProperty("meal_type", mealType);
+        body.addProperty("date", date);
+
+        JsonObject fd = new JsonObject();
+        fd.addProperty("name",  name);
+        fd.addProperty("score", score);
+        fd.addProperty("note",  note);
+        body.add("food_details", fd);
+
+        api.addMealRecord(body).enqueue(new Callback<DietRecord>() {
+            @Override public void onResponse(Call<DietRecord> call, Response<DietRecord> res) {
+                if (res.isSuccessful()) {
+                    fetchAndRenderAll();
+                    Bundle b = new Bundle();
+                    b.putString("record_id", res.body() != null ? res.body().getId() : "");
+                    getParentFragmentManager().setFragmentResult(RESULT_KEY_SAVED, b);
+                    foodInput.setText("");
+                } else {
+                    Toast.makeText(getContext(), "저장 실패: " + res.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<DietRecord> call, Throwable t) {
+                Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchAndRenderAll() {
+        ApiService api = RetrofitClient.getApiService();
+        api.getMealsByDay(nickname, mealType, date).enqueue(new Callback<List<DietRecord>>() {
+            @Override public void onResponse(Call<List<DietRecord>> call, Response<List<DietRecord>> res) {
+                if (res.isSuccessful() && res.body() != null) renderRecords(res.body());
+                else Toast.makeText(getContext(), "불러오기 실패: " + res.code(), Toast.LENGTH_SHORT).show();
+            }
+            @Override public void onFailure(Call<List<DietRecord>> call, Throwable t) {
+                Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showImagePickDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("이미지로 기록하기")
+                .setItems(new CharSequence[]{"사진 촬영", "갤러리에서 불러오기"}, (d, which) -> {
+                    if (which == 0) tryAskCameraAndLaunch();
+                    else pickImageLauncher.launch("image/*");
+                })
+                .show();
+    }
+
+    private void tryAskCameraAndLaunch() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+        } else {
+            launchCamera();
+        }
+    }
+
+    private void launchCamera() {
+        tempPhotoUri = createTempImageUri();
+        if (tempPhotoUri == null) {
+            Toast.makeText(getContext(), "임시 파일 생성 실패", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        takePictureLauncher.launch(tempPhotoUri);
+    }
+
+    @Nullable
+    private Uri createTempImageUri() {
+        try {
+            File dir = new File(requireContext().getCacheDir(), "images");
+            if (!dir.exists()) dir.mkdirs();
+            File f = File.createTempFile("capture_", ".jpg", dir);
+            return FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().getPackageName() + ".fileprovider",
+                    f
+            );
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void analyzeImageAndShowResults(@NonNull Uri uri) {
+        try {
+            String base64 = encodeToBase64(uri);
+            if (base64 == null || base64.length() == 0) {
+                Toast.makeText(getContext(), "이미지 인코딩 실패", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String mime = requireContext().getContentResolver().getType(uri);
+            if (mime == null) mime = "image/jpeg";
+
+            ApiService api = RetrofitClient.getApiService();
+            JsonObject body = new JsonObject();
+            body.addProperty("nickname", nickname);
+            body.addProperty("meal_type", mealType);
+            body.addProperty("image_base64", base64);
+            body.addProperty("image_mime", mime);
+
+            api.chatMeal(body).enqueue(new Callback<ChatMealResponse>() {
+                @Override public void onResponse(Call<ChatMealResponse> call, Response<ChatMealResponse> res) {
+                    if (!res.isSuccessful() || res.body() == null) {
+                        Toast.makeText(getContext(), "이미지 분석 실패: " + res.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    ArrayList<FoodSearchResult> results = new ArrayList<>();
+                    ChatMealResponse resp = res.body();
+
+                    if (resp.getMind() != null && resp.getMind().getItems() != null) {
+                        for (ChatMealResponse.MindItem it : resp.getMind().getItems()) {
+                            String name  = it.getFood();
+                            int    score = it.getScore();
+                            String note  = it.getNote();
+                            String emoji = "🥗";
+                            if (!TextUtils.isEmpty(name)) {
+                                results.add(new FoodSearchResult(name, score, note, emoji));
+                            }
+                        }
+                    }
+
+                    if (results.isEmpty() && resp.getFoods() != null) {
+                        for (String name : resp.getFoods()) {
+                            results.add(new FoodSearchResult(name, 50, "이미지 인식 결과", "🍽️"));
+                        }
+                    }
+
+                    if (results.isEmpty()) {
+                        Toast.makeText(getContext(), "인식된 음식이 없어요.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Intent intent = new Intent(getActivity(), SearchResultMain.class);
+                    intent.putExtra("query", "사진 인식 결과");
+                    intent.putParcelableArrayListExtra("food_results", results);
+                    searchResultLauncher.launch(intent);
+                }
+
+                @Override public void onFailure(Call<ChatMealResponse> call, Throwable t) {
+                    Toast.makeText(getContext(), "이미지 분석 네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "이미지 처리 실패", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void renderRecords(List<DietRecord> list) {
+        selectedListContainer.removeAllViews();
+
+        if (list == null || list.isEmpty()) {
+            selectedListContainer.setVisibility(View.GONE);
+            emptyStateText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        emptyStateText.setVisibility(View.GONE);
+        selectedListContainer.setVisibility(View.VISIBLE);
+
+        for (DietRecord r : list) {
+            View item = buildItemView(r);
+            selectedListContainer.addView(item);
+        }
+    }
+
+    private View buildItemView(DietRecord record) {
+        LinearLayout row = new LinearLayout(getContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setBackgroundResource(R.drawable.rounded_white_shadow);
+        int pad = dp(8);
+        row.setPadding(pad, pad, pad, pad);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dp(8);
+        row.setLayoutParams(lp);
+
+        TextView tv = new TextView(getContext());
+        String title = record.getMessage();
+        if (TextUtils.isEmpty(title) && record.getFoods() != null && !record.getFoods().isEmpty()) {
+            title = record.getFoods().get(0);
+        }
+        tv.setText(title != null ? title : "");
+        tv.setTextColor(0xFF000000);
+        tv.setTextSize(16f);
+        tv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView btn = new TextView(getContext());
+        btn.setText("✖");
+        btn.setTextSize(18f);
+        btn.setTextColor(0xFFFF0000);
+        btn.setPadding(dp(12), dp(4), dp(12), dp(4));
+        btn.setOnClickListener(v -> deleteRecord(record.getId()));
+
+        row.addView(tv);
+        row.addView(btn);
+        return row;
+    }
+
+    private void deleteRecord(String recordId) {
+        ApiService api = RetrofitClient.getApiService();
+        api.deleteMealRecord(recordId).enqueue(new Callback<JsonObject>() {
+            @Override public void onResponse(Call<JsonObject> call, Response<JsonObject> res) {
+                if (res.isSuccessful()) {
+                    fetchAndRenderAll();
+                    Bundle b = new Bundle();
+                    b.putString("record_id", recordId);
+                    getParentFragmentManager().setFragmentResult(RESULT_KEY_DELETED, b);
+                } else {
+                    Toast.makeText(getContext(), "삭제 실패: " + res.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<JsonObject> call, Throwable t) {
+                Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private int dp(int v) {
+        return (int) (getResources().getDisplayMetrics().density * v);
+    }
+
+    private @Nullable String encodeToBase64(@NonNull Uri uri) {
+        try (InputStream is = requireContext().getContentResolver().openInputStream(uri);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            if (is == null) return null;
+            byte[] buf = new byte[8 * 1024];
+            int n;
+            while ((n = is.read(buf)) >= 0) {
+                bos.write(buf, 0, n);
+            }
+            byte[] bytes = bos.toByteArray();
+            return Base64.encodeToString(bytes, Base64.NO_WRAP);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
